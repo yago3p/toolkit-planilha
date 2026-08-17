@@ -6,7 +6,7 @@ Extraia abas de uma planilha como CSVs individuais, ou compile múltiplos arquiv
 
 <!-- 🖼️ Screenshot ou GIF do app aqui -->
 
-**Demo ao vivo:** _(link da Vercel após o deploy)_
+**Demo ao vivo:** https://toolkit-planilhas.vercel.app/
 
 ## Funcionalidades
 
