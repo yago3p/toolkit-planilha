@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toolkit Planilhas</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg:#0A0E14; --surface:#111823; --surface-2:#0D1420; --border:#1E2A38;
+  --text:#E6EDF3; --text-secondary:#8B98A5;
+  --accent:#00D4FF; --accent-dim:rgba(0,212,255,.12);
+  --success:#4ADE80; --success-dim:rgba(74,222,128,.12);
+  --danger:#F87171; --danger-dim:rgba(248,113,113,.12);
+  --warning:#FBBF24; --warning-dim:rgba(251,191,36,.12);
+  --radius:14px;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+::-webkit-scrollbar-thumb:hover{background:#2a3a4d;}
+
+.wrap{max-width:1080px;margin:0 auto;padding:32px 20px 80px;}
+
+header.app-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px;flex-wrap:wrap;}
+.brand{display:flex;align-items:center;gap:14px;}
+.brand-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#0080a3);display:flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(0,212,255,.25);color:#04141a;}
+.brand h1{font-size:19px;margin:0;color:var(--text);}
+.brand p{margin:2px 0 0;font-size:12.5px;color:var(--text-secondary);}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--success);background:var(--success-dim);border:1px solid rgba(74,222,128,.25);padding:6px 12px;border-radius:999px;white-space:nowrap;}
+
+.tabs{display:flex;gap:8px;margin-bottom:24px;border-bottom:1px solid var(--border);}
+.tab-btn{appearance:none;border:none;background:none;color:var(--text-secondary);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;padding:12px 4px;margin-right:22px;cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:8px;transition:color .15s ease,border-color .15s ease;}
+.tab-btn:hover{color:var(--text);}
+.tab-btn.active{color:var(--accent);border-color:var(--accent);}
+.panel{display:none;}
+.panel.active{display:block;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
+.dropzone{border:2px dashed var(--border);border-radius:var(--radius);padding:40px 24px;text-align:center;cursor:pointer;transition:border-color .2s ease,background .2s ease;background:var(--surface);}
+.dropzone:hover,.dropzone.drag-active{border-color:var(--accent);background:var(--accent-dim);}
+.dz-icon{width:56px;height:56px;border-radius:16px;margin:0 auto 14px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--accent);}
+.dropzone h2{font-size:15.5px;margin:0 0 4px;font-weight:600;}
+.dropzone p{margin:0;font-size:12.5px;color:var(--text-secondary);}
+.dz-tags{display:flex;gap:14px;justify-content:center;margin-top:12px;font-size:11.5px;color:var(--text-secondary);flex-wrap:wrap;}
+.dz-tags span{display:flex;align-items:center;gap:5px;}
+.dz-tags svg{width:12px;height:12px;color:var(--success);}
+
+.section-title{display:flex;align-items:center;gap:9px;font-size:14.5px;font-weight:600;margin:0 0 14px;color:var(--text);}
+.section-title svg{color:var(--accent);width:16px;height:16px;}
+
+.file-card{display:flex;align-items:center;gap:12px;padding:11px 13px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;margin-bottom:9px;}
+.file-thumb{width:34px;height:34px;border-radius:8px;flex-shrink:0;background:var(--success-dim);color:var(--success);display:flex;align-items:center;justify-content:center;}
+.file-meta{flex:1;min-width:0;}
+.file-meta .name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.file-meta .sub{font-size:11px;color:var(--text-secondary);margin-top:2px;}
+.icon-btn{width:28px;height:28px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s ease,color .15s ease;flex-shrink:0;}
+.icon-btn:hover{background:var(--surface);color:var(--text);border-color:var(--border);}
+.icon-btn.danger:hover{color:var(--danger);background:var(--danger-dim);}
+.icon-btn svg{width:15px;height:15px;}
+
+label.field-label{display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;}
+input[type=text],input[type=number],select{width:100%;background:var(--surface-2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:9px 11px;font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:border-color .15s ease;}
+input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--accent);}
+input::placeholder{color:#4a5a6b;}
+
+.btn{appearance:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:13px;border-radius:10px;padding:10px 18px;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:filter .15s ease;white-space:nowrap;}
+.btn svg{width:15px;height:15px;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#009fc7);color:#04141a;box-shadow:0 4px 20px rgba(0,212,255,.18);}
+.btn-primary:hover{filter:brightness(1.08);}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;filter:none;}
+.btn-secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--border);}
+.btn-secondary:hover{border-color:#2a3a4d;}
+.btn-success{background:var(--success);color:#04140a;}
+.btn-success:hover{filter:brightness(1.08);}
+.btn-danger-ghost{background:transparent;color:var(--danger);border:1px solid transparent;}
+.btn-danger-ghost:hover{background:var(--danger-dim);}
+.btn-sm{padding:7px 12px;font-size:12px;}
+.btn-block{width:100%;}
+
+.gallery-list{max-height:220px;overflow-y:auto;}
+
+.top-banner{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+.top-banner .lbl{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--accent);margin-bottom:4px;}
+.top-banner .lbl svg{width:14px;height:14px;}
+.top-banner p{margin:0;font-size:12px;color:var(--text-secondary);line-height:1.5;max-width:640px;}
+
+.results-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:14px 16px;}
+.search-wrap{position:relative;flex:1;min-width:200px;max-width:320px;}
+.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-secondary);}
+.search-wrap input{padding-left:32px;}
+.summary-text{font-size:11.5px;color:var(--text-secondary);white-space:nowrap;}
+.toolbar-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.toolbar-actions input{width:170px;}
+
+.table-wrap{overflow-x:auto;max-height:520px;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+thead{position:sticky;top:0;z-index:2;}
+thead th{background:var(--surface-2);color:var(--text-secondary);text-transform:uppercase;font-size:10.5px;letter-spacing:.03em;font-weight:700;padding:11px 12px;text-align:left;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap;}
+thead th:hover{color:var(--text);}
+thead th .th-inner{display:flex;align-items:center;gap:6px;}
+thead th svg{width:12px;height:12px;opacity:.6;}
+thead th.sorted svg{opacity:1;color:var(--accent);}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text);}
+tbody tr:hover{background:var(--surface-2);}
+.idx-col{color:var(--text-secondary);font-size:10.5px;}
+.right-align{text-align:right;font-variant-numeric:tabular-nums;}
+.tag-pill{background:var(--surface-2);border:1px solid var(--border);color:var(--text-secondary);padding:2px 8px;border-radius:6px;font-size:10.5px;}
+.empty-cell{color:#3d4c5c;}
+
+.table-footer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;font-size:12px;color:var(--text-secondary);border-top:1px solid var(--border);}
+.pager{display:flex;align-items:center;gap:10px;}
+
+.progress-card{padding:24px;}
+.progress-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);margin-bottom:8px;}
+.progress-track{width:100%;height:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:999px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#7ef0ff);width:0%;transition:width .2s ease;}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(5,8,12,.92);backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;z-index:60;padding:36px 20px;overflow-y:auto;}
+.modal-overlay.open{display:flex;}
+.modal-box{max-width:760px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:26px;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:14px;}
+.modal-head h3{font-size:16px;margin:0;display:flex;align-items:center;gap:9px;}
+.modal-head h3 svg{width:17px;height:17px;color:var(--accent);}
+.modal-close-x{background:none;border:none;color:var(--text-secondary);cursor:pointer;display:flex;}
+.modal-close-x svg{width:19px;height:19px;}
+.modal-desc{font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px;}
+.modal-desc strong{color:var(--text);}
+.start-row-box{background:var(--accent-dim);border:1px solid rgba(0,212,255,.25);border-radius:12px;padding:12px 14px;margin-bottom:18px;}
+.start-row-box label{color:var(--accent);}
+.start-row-box p{margin:6px 0 0;font-size:11px;color:var(--text-secondary);}
+.start-row-box input{width:110px;}
+
+.fields-toolbar{position:sticky;top:0;background:var(--surface);z-index:3;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--border);}
+.fields-toolbar h4{margin:0;font-size:12.5px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:7px;}
+.fields-toolbar h4 svg{width:14px;height:14px;}
+.fields-toolbar .actions{display:flex;gap:6px;flex-wrap:wrap;}
+
+.field-row{border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--surface-2);margin-bottom:12px;}
+.field-row-top{display:flex;align-items:flex-start;gap:10px;}
+.field-row-top .grow{flex:1;}
+.field-row-top .addr{width:150px;flex-shrink:0;}
+.field-row-btns{display:flex;flex-direction:column;gap:4px;margin-top:19px;}
+.field-row-btns button{width:34px;height:15px;display:flex;align-items:center;justify-content:center;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--text-secondary);cursor:pointer;}
+.field-row-btns svg{width:10px;height:10px;}
+.dup-warning{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--warning);margin-top:8px;}
+.dup-warning svg{width:13px;height:13px;}
+.seg-group{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.seg-btn{padding:6px 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-secondary);font-size:11px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s ease;}
+.seg-btn svg{width:11px;height:11px;}
+.seg-btn.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(0,212,255,.4);}
+.modal-foot{display:flex;justify-content:flex-end;border-top:1px solid var(--border);padding-top:14px;margin-top:6px;}
+
+.toast{position:fixed;bottom:24px;right:24px;z-index:80;transform:translateY(24px);opacity:0;pointer-events:none;transition:all .25s ease;max-width:360px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast-inner{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 16px;border-radius:11px;box-shadow:0 12px 30px rgba(0,0,0,.4);font-size:13px;font-weight:500;}
+.toast-inner svg{width:17px;height:17px;flex-shrink:0;}
+
+.hidden{display:none !important;}
+.mt-10{margin-top:10px;}.mt-16{margin-top:16px;}.mt-22{margin-top:22px;}
+footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(--text-secondary);}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-icon" id="brandIcon"></div>
+      <div>
+        <h1>Toolkit Planilhas</h1>
+        <p>Extraia abas ou compile múltiplas planilhas com campos configuráveis</p>
+      </div>
+    </div>
+    <span class="badge" id="localBadge"></span>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="extract" id="tabExtractBtn"></button>
+    <button class="tab-btn" data-tab="compile" id="tabCompileBtn"></button>
+  </div>
+
+  <!-- ============ ABA: EXTRAIR ABAS ============ -->
+  <div class="panel active" id="panel-extract">
+    <div id="exDropZone" class="dropzone">
+      <input type="file" id="exFileInput" accept=".xlsx,.xls" class="hidden">
+      <div class="dz-icon" id="exDzIcon"></div>
+      <h2>Arraste sua planilha aqui</h2>
+      <p>Extrai cada aba como um arquivo CSV individual</p>
+      <div class="dz-tags"><span id="exTag1"></span><span id="exTag2"></span></div>
+    </div>
+
+    <div id="exResults" class="hidden mt-22">
+      <div class="results-toolbar card">
+        <div>
+          <h3 style="margin:0;font-size:14.5px;display:flex;align-items:center;gap:8px;" id="exResultsTitle"></h3>
+          <p id="exFileNameDisplay" style="margin:4px 0 0;font-size:11.5px;color:var(--text-secondary);"></p>
+        </div>
+        <button class="btn btn-success" id="exDownloadAllBtn"><span id="exZipIcon"></span><span id="exZipLabel">Baixar tudo (ZIP)</span></button>
+      </div>
+      <div id="exSheetList" class="mt-16"></div>
+    </div>
+  </div>
+
+  <!-- ============ ABA: COMPILAR PLANILHAS ============ -->
+  <div class="panel" id="panel-compile">
+
+    <div class="card top-banner">
+      <div style="flex:1;min-width:220px;">
+        <div class="lbl"><span id="cfgIcon"></span><span>Campos configurados para extração:</span></div>
+        <p id="fieldsSummaryText">Nenhum campo configurado ainda. Clique em "Configurar Campos" para começar.</p>
+      </div>
+      <button class="btn btn-primary" id="openConfigBtn"><span id="gearIcon"></span><span>Configurar campos</span></button>
+    </div>
+
+    <div id="cpDropZone" class="dropzone mt-16">
+      <input type="file" id="cpFileInput" multiple accept=".xlsx,.xls" class="hidden">
+      <div class="dz-icon" id="cpDzIcon"></div>
+      <h2>Arraste e solte seus arquivos XLSX aqui</h2>
+      <p>Ou clique para selecionar um ou mais arquivos</p>
+      <div class="dz-tags"><span id="cpTag1"></span></div>
+    </div>
+
+    <div id="cpFileListWrap" class="hidden mt-16 card" style="padding:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+        <div class="section-title" style="margin:0;"><span id="listIcon"></span><span id="cpFileCountLabel">Arquivos selecionados (0)</span></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-danger-ghost btn-sm" id="cpClearBtn"><span id="clearIcon"></span><span>Limpar tudo</span></button>
+          <button class="btn btn-primary btn-sm" id="cpProcessBtn"><span id="playIcon"></span><span>Processar e compilar</span></button>
+        </div>
+      </div>
+      <div id="cpFileList" class="gallery-list"></div>
+      <div id="cpProgressWrap" class="hidden progress-card" style="padding:14px 0 0;">
+        <div class="progress-row"><span id="cpProgressText">Lendo arquivos...</span><span id="cpProgressPercent">0%</span></div>
+        <div class="progress-track"><div class="progress-fill" id="cpProgressBar"></div></div>
+      </div>
+    </div>
+
+    <div id="cpResultsWrap" class="hidden mt-16">
+      <div class="results-toolbar card">
+        <div class="search-wrap">
+          <span id="searchIcon"></span>
+          <input type="text" id="cpSearchInput" placeholder="Buscar em qualquer campo...">
+        </div>
+        <span class="summary-text" id="cpResultsSummary"></span>
+        <div class="toolbar-actions">
+          <input type="text" id="cpOutputName" placeholder="Nome do arquivo de saída">
+          <button class="btn btn-secondary btn-sm" id="cpExportCsvBtn"><span id="csvIcon"></span><span>CSV</span></button>
+          <button class="btn btn-success btn-sm" id="cpExportXlsxBtn"><span id="xlsxIcon"></span><span>XLSX consolidado</span></button>
+        </div>
+      </div>
+
+      <div class="card mt-16" style="overflow:hidden;">
+        <div class="table-wrap">
+          <table>
+            <thead><tr id="cpTableHeaderRow"></tr></thead>
+            <tbody id="cpTableBody"></tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <div>Mostrando <strong id="cpPagStart">0</strong> a <strong id="cpPagEnd">0</strong> de <strong id="cpPagTotal">0</strong> registros</div>
+          <div class="pager">
+            <button class="btn btn-secondary btn-sm" id="cpPrevPage">Anterior</button>
+            <span>Página <span id="cpCurrentPage">1</span> de <span id="cpTotalPages">1</span></span>
+            <button class="btn btn-secondary btn-sm" id="cpNextPage">Próxima</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer" id="appFooter"></footer>
+</div>
+
+<!-- ============ MODAL: CONFIGURAR CAMPOS ============ -->
+<div class="modal-overlay" id="configModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3><span id="modalGearIcon"></span>Configurar campos de extração</h3>
+      <button class="modal-close-x" id="modalCloseBtn"><span id="modalXIcon"></span></button>
+    </div>
+    <p class="modal-desc">
+      Defina os campos que deseja extrair de cada planilha. Cada campo pode vir de uma <strong>célula fixa</strong> (um valor por aba, ex: B2), de uma <strong>coluna da tabela</strong> (um valor por linha, ex: coluna F) ou ser um <strong>valor fixo</strong> digitado por você.
+      As colunas <strong>Arquivo</strong> e <strong>Aba</strong> são incluídas automaticamente. Use as setas de cada campo para definir a ordem das colunas.
+    </p>
+    <div class="start-row-box">
+      <label class="field-label">Linha inicial da tabela de dados</label>
+      <input type="number" id="cfgStartRow" value="6" min="1">
+      <p>Vale apenas para campos do tipo "Coluna da tabela" — primeira linha com dados, abaixo do cabeçalho.</p>
+    </div>
+
+    <div class="fields-toolbar">
+      <h4><span id="fieldsColIcon"></span>Campos</h4>
+      <div class="actions">
+        <input type="file" id="cfgImportInput" accept=".json,application/json" class="hidden">
+        <button type="button" class="btn btn-secondary btn-sm" id="cfgImportBtn"><span id="importIcon"></span><span>Carregar</span></button>
+        <button type="button" class="btn btn-secondary btn-sm" id="cfgExportBtn"><span id="exportIcon"></span><span>Baixar</span></button>
+        <button type="button" class="btn btn-secondary btn-sm" id="cfgAddFieldBtn"><span id="plusIcon"></span><span>Adicionar campo</span></button>
+        <button type="button" class="btn btn-primary btn-sm" id="cfgSaveBtn"><span id="checkIcon"></span><span>Salvar</span></button>
+      </div>
+    </div>
+    <div id="fieldsContainer"></div>
+
+    <div class="modal-foot">
+      <button class="btn btn-secondary btn-sm" id="modalCloseBtn2">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <div class="toast-inner"><span id="toastIcon"></span><span id="toastMessage">Notificação</span></div>
+</div>
+
+<script>
+function icon(name, attrs){ attrs = attrs || 'width="20" height="20"'; return `<i data-lucide="${name}" ${attrs}></i>`; }
+
+/* Ícones estáticos */
+document.getElementById('brandIcon').innerHTML = icon('table-properties','width="22" height="22"');
+document.getElementById('localBadge').innerHTML = icon('shield-check','width="13" height="13"') + ' 100% local e seguro';
+document.getElementById('tabExtractBtn').innerHTML = icon('scissors','width="16" height="16"') + ' Extrair abas';
+document.getElementById('tabCompileBtn').innerHTML = icon('layers','width="16" height="16"') + ' Compilar planilhas';
+document.getElementById('exDzIcon').innerHTML = icon('cloud-upload','width="24" height="24"');
+document.getElementById('exTag1').innerHTML = icon('check','width="12" height="12"') + ' Divide abas automaticamente';
+document.getElementById('exTag2').innerHTML = icon('check','width="12" height="12"') + ' Sem upload para servidores';
+document.getElementById('exResultsTitle').innerHTML = icon('table','width="15" height="15"',) + ' Abas encontradas';
+document.getElementById('exZipIcon').innerHTML = icon('file-archive','width="14" height="14"');
+document.getElementById('cfgIcon').innerHTML = icon('sliders-horizontal','width="14" height="14"');
+document.getElementById('gearIcon').innerHTML = icon('settings-2','width="15" height="15"');
+document.getElementById('cpDzIcon').innerHTML = icon('cloud-upload','width="24" height="24"');
+document.getElementById('cpTag1').innerHTML = icon('check','width="12" height="12"') + ' Suporta múltiplos arquivos (.xlsx, .xls)';
+document.getElementById('listIcon').innerHTML = icon('list-checks','width="15" height="15"');
+document.getElementById('clearIcon').innerHTML = icon('trash-2','width="13" height="13"');
+document.getElementById('playIcon').innerHTML = icon('play','width="13" height="13"');
+document.getElementById('searchIcon').innerHTML = icon('search','width="14" height="14"');
+document.getElementById('csvIcon').innerHTML = icon('file-text','width="13" height="13"');
+document.getElementById('xlsxIcon').innerHTML = icon('file-spreadsheet','width="13" height="13"');
+document.getElementById('modalGearIcon').innerHTML = icon('settings-2','width="17" height="17"');
+document.getElementById('modalXIcon').innerHTML = icon('x','width="19" height="19"');
+document.getElementById('fieldsColIcon').innerHTML = icon('columns-3','width="14" height="14"');
+document.getElementById('importIcon').innerHTML = icon('file-up','width="13" height="13"');
+document.getElementById('exportIcon').innerHTML = icon('file-down','width="13" height="13"');
+document.getElementById('plusIcon').innerHTML = icon('plus','width="13" height="13"');
+document.getElementById('checkIcon').innerHTML = icon('check','width="13" height="13"');
+document.getElementById('appFooter').textContent = 'Os arquivos são processados diretamente no seu navegador. Nenhum dado é salvo ou enviado a servidores externos.';
+
+/* Toast compartilhado */
+const toastEl = document.getElementById('toast');
+const toastIconEl = document.getElementById('toastIcon');
+const toastMessageEl = document.getElementById('toastMessage');
+let toastTimer = null;
+function showToast(message, type){
+  type = type || 'info';
+  const map = {
+    info:{icon:'info',color:'var(--accent)'}, success:{icon:'check-circle-2',color:'var(--success)'},
+    warning:{icon:'alert-triangle',color:'var(--warning)'}, error:{icon:'x-circle',color:'var(--danger)'}
+  };
+  const cfg = map[type] || map.info;
+  toastIconEl.innerHTML = icon(cfg.icon, `width="17" height="17" style="color:${cfg.color}"`);
+  toastMessageEl.textContent = message;
+  lucide.createIcons();
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> toastEl.classList.remove('show'), 3800);
+}
+
+/* Tabs */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ===================== ABA 1: EXTRAIR ABAS ===================== */
+(function(){
+  const dropZone = document.getElementById('exDropZone');
+  const fileInput = document.getElementById('exFileInput');
+  const resultsArea = document.getElementById('exResults');
+  const sheetList = document.getElementById('exSheetList');
+  const btnDownloadAll = document.getElementById('exDownloadAllBtn');
+  const fileNameDisplay = document.getElementById('exFileNameDisplay');
+
+  let currentSheetsData = [];
+  let currentFileName = '';
+
+  dropZone.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', ()=> handleFiles(fileInput.files));
+  ['dragenter','dragover'].forEach(ev=> dropZone.addEventListener(ev, e=>{ e.preventDefault(); dropZone.classList.add('drag-active'); }));
+  ['dragleave','drop'].forEach(ev=> dropZone.addEventListener(ev, e=>{ e.preventDefault(); dropZone.classList.remove('drag-active'); }));
+  dropZone.addEventListener('drop', e=> handleFiles(e.dataTransfer.files));
+
+  function handleFiles(files){
+    if (!files.length) return;
+    const file = files[0];
+    if (!file.name.match(/\.(xlsx|xls)$/i)){ showToast('Envie apenas arquivos Excel (.xlsx ou .xls).', 'warning'); return; }
+
+    currentFileName = file.name.replace(/\.[^/.]+$/, '');
+    showToast('Processando planilha...', 'info');
+
+    const reader = new FileReader();
+    reader.onload = e=>{
+      try{
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type:'array' });
+        currentSheetsData = [];
+        workbook.SheetNames.forEach(name=>{
+          const csv = XLSX.utils.sheet_to_csv(workbook.Sheets[name]);
+          if (csv.trim() !== '') currentSheetsData.push({ name, csv });
+        });
+        renderResults();
+      }catch(err){
+        console.error(err);
+        showToast('Erro ao processar o arquivo. Pode estar corrompido.', 'error');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function renderResults(){
+    sheetList.innerHTML = '';
+    fileNameDisplay.textContent = `Arquivo: ${currentFileName}.xlsx`;
+    if (!currentSheetsData.length){ showToast('Nenhum dado encontrado nas abas desta planilha.', 'warning'); resultsArea.classList.add('hidden'); return; }
+    resultsArea.classList.remove('hidden');
+
+    currentSheetsData.forEach((sheet, idx)=>{
+      const div = document.createElement('div');
+      div.className = 'file-card';
+      div.innerHTML = `
+        <div class="file-thumb">${icon('table','width="15" height="15"')}</div>
+        <div class="file-meta"><div class="name">${sheet.name}.csv</div></div>
+        <button class="icon-btn" data-idx="${idx}" title="Baixar CSV">${icon('download','width="14" height="14"')}</button>
+      `;
+      div.querySelector('button').addEventListener('click', ()=> downloadSingle(idx));
+      sheetList.appendChild(div);
+    });
+    lucide.createIcons();
+    showToast(`${currentSheetsData.length} aba(s) extraída(s).`, 'success');
+  }
+
+  function downloadSingle(idx){
+    const sheet = currentSheetsData[idx];
+    triggerDownload(new Blob([sheet.csv], { type:'text/csv;charset=utf-8;' }), `${sheet.name}.csv`);
+  }
+
+  btnDownloadAll.addEventListener('click', async ()=>{
+    if (!currentSheetsData.length) return;
+    if (currentSheetsData.length === 1){ downloadSingle(0); return; }
+    showToast('Criando arquivo ZIP...', 'info');
+    const zip = new JSZip();
+    currentSheetsData.forEach(s=> zip.file(`${s.name}.csv`, s.csv));
+    const content = await zip.generateAsync({ type:'blob' });
+    triggerDownload(content, `${currentFileName}_Abas.zip`);
+    showToast('Download ZIP iniciado!', 'success');
+  });
+
+  function triggerDownload(blob, filename){
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url; link.download = filename;
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+})();
+
+/* ===================== ABA 2: COMPILAR PLANILHAS ===================== */
+(function(){
+  let selectedFiles = [];
+  let compiledData = [];
+  let filteredData = [];
+  let currentPage = 1;
+  const pageSize = 50;
+  let sortKey = null, sortAsc = true;
+  let fieldsCounter = 0;
+
+  let config = { startRow: 6, fields: [] };
+
+  const SOURCE_TYPES = [
+    { value:'cell', label:'Célula fixa', icon:'grid-3x3' },
+    { value:'column', label:'Coluna da tabela', icon:'table-2' },
+    { value:'fixed', label:'Valor fixo', icon:'pin' }
+  ];
+  const DATA_TYPES = [
+    { value:'text', label:'Texto', icon:'type' },
+    { value:'number', label:'Número', icon:'hash' },
+    { value:'currency', label:'Moeda (R$)', icon:'banknote' },
+    { value:'date', label:'Data', icon:'calendar' },
+    { value:'latitude', label:'Latitude', icon:'map-pin' },
+    { value:'longitude', label:'Longitude', icon:'globe' },
+    { value:'image', label:'Imagem (em breve)', icon:'image' }
+  ];
+  const DATA_TYPE_LABELS = { text:'texto', number:'número', currency:'moeda', date:'data', latitude:'latitude', longitude:'longitude', image:'imagem' };
+  const NUMERIC_TYPES = ['number','currency','latitude','longitude'];
+
+  const dropZone = document.getElementById('cpDropZone');
+  const fileInput = document.getElementById('cpFileInput');
+  const listWrap = document.getElementById('cpFileListWrap');
+  const fileListEl = document.getElementById('cpFileList');
+  const fileCountLabel = document.getElementById('cpFileCountLabel');
+  const clearBtn = document.getElementById('cpClearBtn');
+  const processBtn = document.getElementById('cpProcessBtn');
+  const progressWrap = document.getElementById('cpProgressWrap');
+  const progressBar = document.getElementById('cpProgressBar');
+  const progressText = document.getElementById('cpProgressText');
+  const progressPercent = document.getElementById('cpProgressPercent');
+  const resultsWrap = document.getElementById('cpResultsWrap');
+  const searchInput = document.getElementById('cpSearchInput');
+  const resultsSummary = document.getElementById('cpResultsSummary');
+  const outputNameInput = document.getElementById('cpOutputName');
+  const headerRow = document.getElementById('cpTableHeaderRow');
+  const tableBody = document.getElementById('cpTableBody');
+  const fieldsSummaryText = document.getElementById('fieldsSummaryText');
+
+  dropZone.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', ()=>{ addFiles(Array.from(fileInput.files)); fileInput.value=''; });
+  ['dragenter','dragover'].forEach(ev=> dropZone.addEventListener(ev, e=>{ e.preventDefault(); dropZone.classList.add('drag-active'); }));
+  ['dragleave','drop'].forEach(ev=> dropZone.addEventListener(ev, e=>{ e.preventDefault(); dropZone.classList.remove('drag-active'); }));
+  dropZone.addEventListener('drop', e=> addFiles(Array.from(e.dataTransfer.files)));
+
+  function addFiles(files){
+    const valid = files.filter(f=> /\.(xlsx|xls)$/i.test(f.name));
+    if (!valid.length){ showToast('Selecione arquivos com extensão .xlsx ou .xls.', 'warning'); return; }
+    valid.forEach(f=>{ if (!selectedFiles.some(s=> s.name===f.name && s.size===f.size)) selectedFiles.push(f); });
+    renderFileList();
+  }
+  function removeFile(idx){ selectedFiles.splice(idx,1); renderFileList(); }
+  clearBtn.addEventListener('click', ()=>{
+    selectedFiles = []; compiledData = []; filteredData = [];
+    renderFileList(); resultsWrap.classList.add('hidden');
+  });
+
+  function renderFileList(){
+    listWrap.classList.toggle('hidden', selectedFiles.length===0);
+    fileCountLabel.textContent = `Arquivos selecionados (${selectedFiles.length})`;
+    fileListEl.innerHTML = selectedFiles.map((f,idx)=>`
+      <div class="file-card">
+        <div class="file-thumb">${icon('file-spreadsheet','width="15" height="15"')}</div>
+        <div class="file-meta"><div class="name">${f.name}</div><div class="sub">${(f.size/1024).toFixed(1)} KB</div></div>
+        <button class="icon-btn danger" data-idx="${idx}">${icon('x','width="14" height="14"')}</button>
+      </div>
+    `).join('');
+    fileListEl.querySelectorAll('button[data-idx]').forEach(btn=>{
+      btn.addEventListener('click', ()=> removeFile(parseInt(btn.dataset.idx,10)));
+    });
+    lucide.createIcons();
+  }
+
+  /* Helpers de planilha */
+  function colLetterToIdx(letter){
+    letter = String(letter||'').toUpperCase().trim();
+    let col = 0;
+    for (let i=0;i<letter.length;i++) col += (letter.charCodeAt(i)-64) * Math.pow(26, letter.length-i-1);
+    return col-1;
+  }
+  function excelDateToJSDate(serial){
+    const utcDays = Math.floor(serial - 25569);
+    const utcValue = utcDays * 86400;
+    const dateInfo = new Date(utcValue * 1000);
+    const fractionalDay = serial - Math.floor(serial) + 0.0000001;
+    const totalSeconds = Math.floor(86400 * fractionalDay);
+    const seconds = totalSeconds % 60;
+    const hours = Math.floor(totalSeconds/3600);
+    const minutes = Math.floor(totalSeconds/60) % 60;
+    return new Date(dateInfo.getUTCFullYear(), dateInfo.getUTCMonth(), dateInfo.getUTCDate(), hours, minutes, seconds);
+  }
+  function formatDateBR(value){
+    if (value===undefined || value===null || value==='') return '';
+    if (value instanceof Date && !isNaN(value)){
+      return `${String(value.getDate()).padStart(2,'0')}/${String(value.getMonth()+1).padStart(2,'0')}/${value.getFullYear()}`;
+    }
+    if (typeof value==='number' && value>0){
+      const d = excelDateToJSDate(value);
+      if (!isNaN(d)) return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    }
+    let str = String(value).trim();
+    if (!str) return '';
+    str = str.replace(/\./g,'/').replace(/-/g,'/');
+    if (/^\d{8}$/.test(str)) return `${str.slice(0,2)}/${str.slice(2,4)}/${str.slice(4,8)}`;
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(str)){ const [d,m,a]=str.split('/'); return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${a}`; }
+    if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(str)){ const [a,m,d]=str.split('/'); return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${a}`; }
+    const parsed = new Date(str);
+    if (!isNaN(parsed)) return `${String(parsed.getDate()).padStart(2,'0')}/${String(parsed.getMonth()+1).padStart(2,'0')}/${parsed.getFullYear()}`;
+    return str;
+  }
+  function parseNumber(val){
+    if (val===undefined || val===null || val==='') return null;
+    if (typeof val==='number') return val;
+    const n = parseFloat(String(val).trim().replace(',','.'));
+    return isNaN(n) ? null : n;
+  }
+
+  /* Modal de configuração */
+  const configModal = document.getElementById('configModal');
+  const cfgStartRow = document.getElementById('cfgStartRow');
+  const fieldsContainer = document.getElementById('fieldsContainer');
+
+  document.getElementById('openConfigBtn').addEventListener('click', ()=> toggleConfigModal(true));
+  document.getElementById('modalCloseBtn').addEventListener('click', ()=> toggleConfigModal(false));
+  document.getElementById('modalCloseBtn2').addEventListener('click', ()=> toggleConfigModal(false));
+  configModal.addEventListener('click', e=>{ if (e.target===configModal) toggleConfigModal(false); });
+
+  function toggleConfigModal(show){
+    if (show){ cfgStartRow.value = config.startRow; renderFieldsConfig(); }
+    configModal.classList.toggle('open', show);
+  }
+
+  function renderFieldsConfig(){
+    fieldsContainer.innerHTML = '';
+    if (!config.fields.length) createFieldRow();
+    else config.fields.forEach(f=> createFieldRow(f));
+  }
+
+  document.getElementById('cfgAddFieldBtn').addEventListener('click', ()=> createFieldRow({}, true));
+
+  function getAddressMeta(sourceType){
+    if (sourceType==='fixed') return { label:'Valor', placeholder:'Ex: Sim, 10, BR-163...' };
+    if (sourceType==='cell') return { label:'Endereço', placeholder:'Ex: B2' };
+    return { label:'Endereço', placeholder:'Ex: F' };
+  }
+
+  function createFieldRow(fieldCfg, prepend){
+    fieldCfg = fieldCfg || {};
+    fieldsCounter += 1;
+    const rowId = fieldCfg.id || `field_${fieldsCounter}_${Date.now()}`;
+    const sourceType = fieldCfg.sourceType || 'column';
+    const dataType = fieldCfg.dataType || 'text';
+    const meta = getAddressMeta(sourceType);
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'field-row';
+    wrapper.dataset.rowId = rowId;
+    wrapper.dataset.sourceType = sourceType;
+    wrapper.dataset.dataType = dataType;
+
+    const sourceBtns = SOURCE_TYPES.map(s=> `<button type="button" class="seg-btn ${sourceType===s.value?'active':''}" data-kind="source" data-value="${s.value}">${icon(s.icon,'width="11" height="11"')} ${s.label}</button>`).join('');
+    const typeBtns = DATA_TYPES.map(t=> `<button type="button" class="seg-btn ${dataType===t.value?'active':''}" data-kind="dtype" data-value="${t.value}">${icon(t.icon,'width="11" height="11"')} ${t.label}</button>`).join('');
+
+    wrapper.innerHTML = `
+      <div class="field-row-top">
+        <div class="grow">
+          <label class="field-label">Nome da coluna</label>
+          <input type="text" data-field="name" value="${fieldCfg.name||''}" placeholder="Ex: Rodovia, Latitude, Observação...">
+        </div>
+        <div class="addr">
+          <label class="field-label" data-role="address-label">${meta.label}</label>
+          <input type="text" data-field="address" value="${fieldCfg.address||''}" placeholder="${meta.placeholder}">
+        </div>
+        <div class="field-row-btns">
+          <button type="button" data-act="up">${icon('chevron-up')}</button>
+          <button type="button" data-act="down">${icon('chevron-down')}</button>
+        </div>
+        <button type="button" class="icon-btn danger" data-act="remove" style="margin-top:19px;">${icon('trash-2','width="14" height="14"')}</button>
+      </div>
+      <p data-role="dup-warning" class="dup-warning hidden">${icon('triangle-alert','width="12" height="12"')} Já existe um campo com este nome e endereço.</p>
+      <div class="mt-10">
+        <label class="field-label">Origem do valor</label>
+        <div class="seg-group" data-role="source-group">${sourceBtns}</div>
+      </div>
+      <div class="mt-10">
+        <label class="field-label">Tipo de dado</label>
+        <div class="seg-group" data-role="dtype-group">${typeBtns}</div>
+      </div>
+    `;
+
+    wrapper.querySelector('[data-field="name"]').addEventListener('input', checkDuplicateFields);
+    wrapper.querySelector('[data-field="address"]').addEventListener('input', checkDuplicateFields);
+    wrapper.querySelector('[data-act="up"]').addEventListener('click', ()=> moveFieldRow(rowId,'up'));
+    wrapper.querySelector('[data-act="down"]').addEventListener('click', ()=> moveFieldRow(rowId,'down'));
+    wrapper.querySelector('[data-act="remove"]').addEventListener('click', ()=>{ wrapper.remove(); checkDuplicateFields(); });
+
+    wrapper.querySelectorAll('[data-kind="source"]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        wrapper.dataset.sourceType = btn.dataset.value;
+        wrapper.querySelectorAll('[data-kind="source"]').forEach(b=> b.classList.toggle('active', b===btn));
+        const m = getAddressMeta(btn.dataset.value);
+        wrapper.querySelector('[data-role="address-label"]').textContent = m.label;
+        wrapper.querySelector('[data-field="address"]').placeholder = m.placeholder;
+      });
+    });
+    wrapper.querySelectorAll('[data-kind="dtype"]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        wrapper.dataset.dataType = btn.dataset.value;
+        wrapper.querySelectorAll('[data-kind="dtype"]').forEach(b=> b.classList.toggle('active', b===btn));
+      });
+    });
+
+    if (prepend && fieldsContainer.firstChild) fieldsContainer.insertBefore(wrapper, fieldsContainer.firstChild);
+    else fieldsContainer.appendChild(wrapper);
+    lucide.createIcons();
+    checkDuplicateFields();
+  }
+
+  function moveFieldRow(rowId, dir){
+    const row = fieldsContainer.querySelector(`[data-row-id="${rowId}"]`);
+    if (!row) return;
+    if (dir==='up' && row.previousElementSibling) fieldsContainer.insertBefore(row, row.previousElementSibling);
+    if (dir==='down' && row.nextElementSibling) fieldsContainer.insertBefore(row.nextElementSibling, row);
+  }
+
+  function checkDuplicateFields(){
+    const rows = Array.from(fieldsContainer.querySelectorAll('[data-row-id]'));
+    const counts = new Map();
+    const sigFor = row=>{
+      const name = row.querySelector('[data-field="name"]').value.trim().toLowerCase();
+      const addr = row.querySelector('[data-field="address"]').value.trim().toLowerCase();
+      return name && addr ? `${name}|${addr}` : null;
+    };
+    rows.forEach(r=>{ const s = sigFor(r); if (s) counts.set(s,(counts.get(s)||0)+1); });
+    let hasDup = false;
+    rows.forEach(r=>{
+      const s = sigFor(r);
+      const isDup = !!s && counts.get(s)>1;
+      if (isDup) hasDup = true;
+      r.querySelector('[data-role="dup-warning"]').classList.toggle('hidden', !isDup);
+    });
+    return hasDup;
+  }
+
+  function collectFieldsFromUI(){
+    return Array.from(fieldsContainer.querySelectorAll('[data-row-id]')).map(row=>{
+      const sourceType = row.dataset.sourceType;
+      const raw = row.querySelector('[data-field="address"]').value.trim();
+      return {
+        id: row.dataset.rowId,
+        name: row.querySelector('[data-field="name"]').value.trim(),
+        address: sourceType==='fixed' ? raw : raw.toUpperCase(),
+        sourceType, dataType: row.dataset.dataType
+      };
+    }).filter(f=> f.name && f.address);
+  }
+
+  document.getElementById('cfgSaveBtn').addEventListener('click', ()=>{
+    if (checkDuplicateFields()){ showToast('Existem campos duplicados destacados — corrija antes de salvar.', 'warning'); return; }
+    config.startRow = parseInt(cfgStartRow.value,10) || 6;
+    config.fields = collectFieldsFromUI();
+    updateFieldsSummary();
+    toggleConfigModal(false);
+    showToast('Configuração salva! Clique em "Processar e compilar" para aplicar.', 'success');
+  });
+
+  document.getElementById('cfgExportBtn').addEventListener('click', ()=>{
+    const fields = collectFieldsFromUI();
+    if (!fields.length){ showToast('Não há campos configurados para baixar.', 'warning'); return; }
+    const payload = { startRow: parseInt(cfgStartRow.value,10) || config.startRow, fields: fields.map(({id,...r})=>r) };
+    const blob = new Blob([JSON.stringify(payload,null,2)], { type:'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `Configuracao_Compilador_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('cfgImportBtn').addEventListener('click', ()=> document.getElementById('cfgImportInput').click());
+  document.getElementById('cfgImportInput').addEventListener('change', async e=>{
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    try{
+      const payload = JSON.parse(await file.text());
+      if (!payload || !Array.isArray(payload.fields)){ showToast('Arquivo de configuração inválido.', 'error'); return; }
+      const imported = payload.fields.filter(f=> f && f.name && f.address && f.sourceType && f.dataType)
+        .map((f,idx)=> ({ id:`field_imported_${idx}_${Date.now()}`, name:String(f.name), address:String(f.address), sourceType:f.sourceType, dataType:f.dataType }));
+      if (!imported.length){ showToast('Nenhum campo válido encontrado nesse arquivo.', 'warning'); return; }
+      config.startRow = parseInt(payload.startRow,10) || config.startRow;
+      config.fields = imported;
+      cfgStartRow.value = config.startRow;
+      renderFieldsConfig();
+      updateFieldsSummary();
+      showToast(`${imported.length} campo(s) carregado(s). Clique em "Salvar" para confirmar.`, 'success');
+    }catch(err){
+      console.error(err);
+      showToast('Não foi possível ler o arquivo de configuração.', 'error');
+    }
+  });
+
+  function updateFieldsSummary(){
+    if (!config.fields.length){ fieldsSummaryText.textContent = 'Nenhum campo configurado ainda. Clique em "Configurar campos" para começar.'; return; }
+    const parts = config.fields.map(f=>{
+      const origem = f.sourceType==='cell' ? `célula ${f.address}` : f.sourceType==='fixed' ? `valor fixo "${f.address}"` : `coluna ${f.address}`;
+      return `<strong style="color:var(--text)">${f.name}</strong> (${origem}, ${DATA_TYPE_LABELS[f.dataType]||f.dataType})`;
+    });
+    fieldsSummaryText.innerHTML = parts.join(' <span style="color:var(--border)">•</span> ') + ' <span style="color:var(--text-secondary)">— Arquivo e Aba são incluídos automaticamente.</span>';
+  }
+
+  /* Colunas dinâmicas */
+  function getColumns(){
+    const base = [
+      { key:'arquivo', label:'Arquivo', dataType:'text', align:'left' },
+      { key:'aba', label:'Aba', dataType:'text', align:'left' }
+    ];
+    const extra = config.fields.map(f=> ({ key:f.id, label:f.name, dataType:f.dataType, align: NUMERIC_TYPES.includes(f.dataType)?'right':'left' }));
+    return [...base, ...extra];
+  }
+
+  /* Processamento */
+  function getFieldRawValue(sheet, row, field){
+    if (field.sourceType==='fixed') return field.address;
+    if (field.sourceType==='cell') return sheet?.[field.address]?.v;
+    return row?.[colLetterToIdx(field.address)];
+  }
+  function parseFieldValue(raw, dataType){
+    if (raw===undefined || raw===null || String(raw).trim()==='') return null;
+    switch(dataType){
+      case 'number': case 'currency': case 'latitude': case 'longitude': return parseNumber(raw);
+      case 'date': return formatDateBR(raw) || null;
+      case 'image': return null;
+      default: return String(raw).trim();
+    }
+  }
+
+  processBtn.addEventListener('click', async ()=>{
+    if (!selectedFiles.length) return;
+    if (!config.fields.length){ showToast('Configure ao menos um campo antes de processar.', 'warning'); return; }
+
+    progressWrap.classList.remove('hidden');
+    compiledData = [];
+    let totalSheets = 0;
+    let failedFiles = [];
+    const fields = config.fields;
+    const columnFields = fields.filter(f=> f.sourceType==='column');
+    const startRowIdx = Math.max(0, config.startRow - 1);
+
+    for (let i=0;i<selectedFiles.length;i++){
+      const file = selectedFiles[i];
+      progressText.textContent = `Lendo arquivo: ${file.name}`;
+      const pct = Math.round((i/selectedFiles.length)*100);
+      progressBar.style.width = pct+'%'; progressPercent.textContent = pct+'%';
+
+      try{
+        const buf = await file.arrayBuffer();
+        const workbook = XLSX.read(buf, { type:'array', cellDates:true, cellFormulas:false });
+
+        for (const sheetName of workbook.SheetNames){
+          totalSheets++;
+          const sheet = workbook.Sheets[sheetName];
+          const fixedValues = {};
+          fields.forEach(f=>{ if (f.sourceType==='cell' || f.sourceType==='fixed') fixedValues[f.id] = parseFieldValue(getFieldRawValue(sheet,null,f), f.dataType); });
+
+          if (!columnFields.length){
+            const rowObj = { arquivo:file.name, aba:sheetName };
+            fields.forEach(f=> rowObj[f.id] = fixedValues[f.id] ?? null);
+            compiledData.push(rowObj);
+            continue;
+          }
+
+          const rows = XLSX.utils.sheet_to_json(sheet, { header:1, defval:'' });
+          for (let r=startRowIdx; r<rows.length; r++){
+            const row = rows[r];
+            if (!row || !row.length) continue;
+            const raws = columnFields.map(f=> getFieldRawValue(sheet,row,f));
+            if (!raws.some(v=> v!==undefined && v!==null && String(v).trim()!=='')) continue;
+            const rowObj = { arquivo:file.name, aba:sheetName };
+            fields.forEach(f=>{
+              rowObj[f.id] = (f.sourceType==='cell'||f.sourceType==='fixed') ? (fixedValues[f.id] ?? null) : parseFieldValue(getFieldRawValue(sheet,row,f), f.dataType);
+            });
+            compiledData.push(rowObj);
+          }
+        }
+      }catch(err){
+        console.error('Erro ao ler arquivo '+file.name, err);
+        failedFiles.push(file.name);
+      }
+    }
+
+    progressBar.style.width='100%'; progressPercent.textContent='100%'; progressText.textContent='Compilação concluída!';
+
+    setTimeout(()=>{
+      progressWrap.classList.add('hidden');
+      displayResults(totalSheets);
+      if (failedFiles.length) showToast(`${failedFiles.length} arquivo(s) falharam ao processar: ${failedFiles.join(', ')}`, 'error');
+      else showToast('Compilação concluída com sucesso!', 'success');
+    }, 350);
+  });
+
+  function displayResults(totalSheets){
+    resultsWrap.classList.remove('hidden');
+    filteredData = [...compiledData];
+    resultsSummary.textContent = `${compiledData.length.toLocaleString('pt-BR')} registro(s) de ${selectedFiles.length} arquivo(s) e ${totalSheets} aba(s).`;
+    currentPage = 1;
+    renderTableHeader();
+    renderTable();
+  }
+
+  searchInput.addEventListener('input', ()=>{
+    const term = searchInput.value.toLowerCase().trim();
+    filteredData = !term ? [...compiledData] : compiledData.filter(item=> Object.values(item).some(v=> v!==null && v!==undefined && String(v).toLowerCase().includes(term)));
+    currentPage = 1;
+    renderTable();
+  });
+
+  function sortTable(key){
+    if (sortKey === key) sortAsc = !sortAsc; else { sortKey = key; sortAsc = true; }
+    const direction = sortAsc ? 1 : -1;
+    const col = getColumns().find(c=> c.key===key);
+    const numeric = col && NUMERIC_TYPES.includes(col.dataType);
+    filteredData.sort((a,b)=>{
+      let va=a[key], vb=b[key];
+      if (numeric){ va = va==null?-Infinity:va; vb = vb==null?-Infinity:vb; return (va-vb)*direction; }
+      va = va ?? ''; vb = vb ?? '';
+      return String(va).localeCompare(String(vb),'pt-BR')*direction;
+    });
+    renderTableHeader();
+    renderTable();
+  }
+
+  function renderTableHeader(){
+    const columns = getColumns();
+    headerRow.innerHTML = `<th class="idx-col">#</th>` + columns.map(col=>{
+      const alignClass = col.align==='right' ? ' right-align' : '';
+      const isSorted = sortKey === col.key;
+      const arrowIcon = isSorted ? (sortAsc ? 'arrow-up' : 'arrow-down') : 'chevrons-up-down';
+      return `<th class="${isSorted?'sorted':''}${alignClass}" data-key="${col.key}"><span class="th-inner">${col.label} ${icon(arrowIcon,'width="12" height="12"')}</span></th>`;
+    }).join('');
+    headerRow.querySelectorAll('th[data-key]').forEach(th=> th.addEventListener('click', ()=> sortTable(th.dataset.key)));
+    lucide.createIcons();
+  }
+
+  function formatCellDisplay(value, dataType){
+    if (value===null || value===undefined || value===''){
+      return dataType==='image' ? '<span class="empty-cell">Imagem (em breve)</span>' : '<span class="empty-cell">—</span>';
+    }
+    switch(dataType){
+      case 'number': return typeof value==='number' ? value.toLocaleString('pt-BR',{maximumFractionDigits:4}) : value;
+      case 'currency': return typeof value==='number' ? value.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : value;
+      case 'latitude': case 'longitude': return typeof value==='number' ? value.toFixed(6) : value;
+      default: return value;
+    }
+  }
+
+  function renderTable(){
+    const total = filteredData.length;
+    const columns = getColumns();
+    if (!total){
+      tableBody.innerHTML = `<tr><td colspan="${columns.length+1}" style="text-align:center;padding:34px;color:var(--text-secondary);">Nenhum registro encontrado.</td></tr>`;
+      document.getElementById('cpPagStart').textContent='0'; document.getElementById('cpPagEnd').textContent='0'; document.getElementById('cpPagTotal').textContent='0';
+      return;
+    }
+    const totalPages = Math.ceil(total/pageSize);
+    currentPage = Math.max(1, Math.min(currentPage, totalPages));
+    const start = (currentPage-1)*pageSize;
+    const end = Math.min(start+pageSize, total);
+    const pageData = filteredData.slice(start, end);
+
+    tableBody.innerHTML = pageData.map((d,i)=>{
+      const cells = columns.map(col=>{
+        const alignClass = col.align==='right' ? ' right-align' : '';
+        const value = d[col.key];
+        if (col.key==='arquivo') return `<td style="font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${value??''}">${value??''}</td>`;
+        if (col.key==='aba') return `<td><span class="tag-pill">${value??''}</span></td>`;
+        return `<td class="${alignClass}">${formatCellDisplay(value, col.dataType)}</td>`;
+      }).join('');
+      return `<tr><td class="idx-col">${start+i+1}</td>${cells}</tr>`;
+    }).join('');
+
+    document.getElementById('cpPagStart').textContent = (start+1).toLocaleString('pt-BR');
+    document.getElementById('cpPagEnd').textContent = end.toLocaleString('pt-BR');
+    document.getElementById('cpPagTotal').textContent = total.toLocaleString('pt-BR');
+    document.getElementById('cpCurrentPage').textContent = currentPage;
+    document.getElementById('cpTotalPages').textContent = totalPages;
+    document.getElementById('cpPrevPage').disabled = currentPage===1;
+    document.getElementById('cpNextPage').disabled = currentPage===totalPages;
+  }
+
+  document.getElementById('cpPrevPage').addEventListener('click', ()=>{ currentPage--; renderTable(); });
+  document.getElementById('cpNextPage').addEventListener('click', ()=>{ currentPage++; renderTable(); });
+
+  function getOutputFileName(ext){
+    let base = outputNameInput.value.trim() || `Compilado_${new Date().toISOString().slice(0,10)}`;
+    base = base.replace(/[\\/:*?"<>|]+/g,'').trim() || 'Compilado';
+    base = base.replace(new RegExp(`\\.${ext}$`,'i'), '');
+    return `${base}.${ext}`;
+  }
+
+  document.getElementById('cpExportXlsxBtn').addEventListener('click', ()=>{
+    if (!compiledData.length) return;
+    const columns = getColumns();
+    const rows = compiledData.map(d=>{
+      const row = {};
+      columns.forEach(col=> row[col.label] = (d[col.key]===null || d[col.key]===undefined) ? '' : d[col.key]);
+      return row;
+    });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Compilado');
+    ws['!cols'] = columns.map(()=> ({ wch:16 }));
+    XLSX.writeFile(wb, getOutputFileName('xlsx'));
+    showToast('XLSX consolidado gerado!', 'success');
+  });
+
+  document.getElementById('cpExportCsvBtn').addEventListener('click', ()=>{
+    if (!compiledData.length) return;
+    const columns = getColumns();
+    let csv = '\uFEFF' + columns.map(c=>c.label).join(';') + '\n';
+    compiledData.forEach(d=>{
+      csv += columns.map(col=>{
+        const v = d[col.key];
+        if (v===null || v===undefined) return '';
+        if (typeof v==='number') return v;
+        return `"${String(v).replace(/"/g,'""')}"`;
+      }).join(';') + '\n';
+    });
+    const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = getOutputFileName('csv');
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('CSV exportado!', 'success');
+  });
+
+  updateFieldsSummary();
+})();
+
+lucide.createIcons();
+</script>
+</body>
+</html>
