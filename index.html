@@ -46,6 +46,7 @@ header.app-header{display:flex;align-items:center;justify-content:space-between;
 .subtab-btn{appearance:none;border:1px solid var(--border);background:var(--surface-2);color:var(--text-secondary);font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;padding:8px 16px;cursor:pointer;border-radius:9px;display:flex;align-items:center;gap:7px;transition:all .15s ease;}
 .subtab-btn:hover{color:var(--text);border-color:#2a3a4d;}
 .subtab-btn.active{color:var(--accent);border-color:rgba(0,212,255,.4);background:var(--accent-dim);}
+.empty-hint{text-align:center;padding:34px;color:var(--text-secondary);font-size:12.5px;}
 
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
 .dropzone{border:2px dashed var(--border);border-radius:var(--radius);padding:40px 24px;text-align:center;cursor:pointer;transition:border-color .2s ease,background .2s ease;background:var(--surface);}
@@ -183,7 +184,10 @@ footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(-
         <p>Extraia abas ou compile múltiplas planilhas com campos configuráveis</p>
       </div>
     </div>
-    <span class="badge" id="localBadge"></span>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button id="helpBtn" class="icon-btn" title="Como usar" style="width:36px;height:36px;border:1px solid var(--border);"><span id="helpBtnIcon"></span></button>
+      <span class="badge" id="localBadge"></span>
+    </div>
   </header>
 
   <div class="tabs">
@@ -284,6 +288,7 @@ footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(-
   <!-- ============ ABA: SEGMENTAR DADOS ============ -->
   <div class="panel" id="panel-segment">
 
+    <div class="section-title"><span id="segSourceIcon"></span>1. Fonte dos dados</div>
     <div class="tabs" style="border-bottom:none; margin-bottom:16px;">
       <button class="subtab-btn active" data-segsubtab="import" id="segTabImportBtn"></button>
       <button class="subtab-btn" data-segsubtab="manual" id="segTabManualBtn"></button>
@@ -298,41 +303,42 @@ footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(-
       </div>
     </div>
 
-    <div id="seg-panel-manual" class="hidden">
-      <div class="card" style="padding:16px;">
-        <div class="section-title" style="margin:0 0 12px;"><span id="segManualIcon"></span>Montar tabela manualmente</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <input type="text" id="segNewColName" placeholder="Nome da nova coluna" style="max-width:220px;">
-          <button class="btn btn-secondary btn-sm" id="segAddColBtn"><span id="segAddColIcon"></span><span>Adicionar coluna</span></button>
-          <button class="btn btn-secondary btn-sm" id="segAddRowBtn"><span id="segAddRowIcon"></span><span>Nova linha</span></button>
-        </div>
+    <div id="seg-panel-manual" class="hidden card" style="padding:20px;">
+      <div class="section-title" style="margin:0 0 4px;"><span id="segManualIcon"></span>Montar tabela manualmente</div>
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">Sem planilha em mãos? Crie as colunas e linhas direto aqui.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input type="text" id="segNewColName" placeholder="Nome da nova coluna" style="max-width:240px;flex:1;min-width:180px;">
+        <button class="btn btn-secondary btn-sm" id="segAddColBtn"><span id="segAddColIcon"></span><span>Adicionar coluna</span></button>
+        <button class="btn btn-secondary btn-sm" id="segAddRowBtn"><span id="segAddRowIcon"></span><span>Nova linha</span></button>
       </div>
     </div>
 
-    <div class="card mt-16" style="padding:20px;">
-      <div class="options-grid" style="grid-template-columns:repeat(5,1fr);align-items:end;">
+    <div class="section-title mt-22"><span id="segConfigIcon"></span>2. Configurar a segmentação</div>
+    <div class="card" style="padding:20px;">
+      <div class="options-grid" style="grid-template-columns:1fr 1fr 1fr;">
         <div>
-          <label class="field-label">Coluna início</label>
+          <label class="field-label">Coluna de início</label>
           <select id="segStartCol"></select>
         </div>
         <div>
-          <label class="field-label">Coluna fim</label>
+          <label class="field-label">Coluna de fim</label>
           <select id="segEndCol"></select>
         </div>
         <div>
-          <label class="field-label">Passo</label>
+          <label class="field-label">Passo (tamanho de cada segmento)</label>
           <input type="text" id="segStepSize" value="0,100">
         </div>
-        <button class="btn btn-primary" id="segProcessBtn"><span id="segProcessIcon"></span><span>Processar</span></button>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-success btn-sm" id="segExportXlsxBtn" style="flex:1;"><span id="segXlsxIcon"></span><span>XLSX</span></button>
-          <button class="btn btn-secondary btn-sm" id="segExportCsvBtn" style="flex:1;"><span id="segCsvIcon"></span><span>CSV</span></button>
-        </div>
       </div>
-      <p id="segStepHint" class="mt-10" style="font-size:11.5px;color:var(--text-secondary);"></p>
+      <p id="segStepHint" class="mt-10" style="font-size:11.5px;"></p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;border-top:1px solid var(--border);padding-top:16px;">
+        <button class="btn btn-primary" id="segProcessBtn" style="flex:2;min-width:160px;"><span id="segProcessIcon"></span><span>Processar segmentação</span></button>
+        <button class="btn btn-success btn-sm" id="segExportXlsxBtn" style="flex:1;min-width:100px;"><span id="segXlsxIcon"></span><span>Exportar XLSX</span></button>
+        <button class="btn btn-secondary btn-sm" id="segExportCsvBtn" style="flex:1;min-width:100px;"><span id="segCsvIcon"></span><span>Exportar CSV</span></button>
+      </div>
     </div>
 
-    <div class="card mt-16" style="overflow:hidden;">
+    <div class="section-title mt-22"><span id="segResultIcon"></span>3. Resultado</div>
+    <div class="card" style="overflow:hidden;">
       <div class="table-wrap">
         <table>
           <thead><tr id="segTableHeaderRow"></tr></thead>
@@ -381,6 +387,61 @@ footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(-
   </div>
 </div>
 
+<div class="modal-overlay" id="helpModal">
+  <div class="modal-box" style="max-width:640px;">
+    <div class="modal-head">
+      <h3><span id="helpModalIcon"></span>Como usar o Toolkit Planilhas</h3>
+      <button class="modal-close-x" id="helpCloseBtn"><span id="helpXIcon"></span></button>
+    </div>
+    <div style="max-height:65vh;overflow-y:auto;padding-right:6px;">
+
+      <div class="mt-10">
+        <div class="section-title" style="margin-bottom:6px;"><span id="helpExtractIcon"></span>Extrair Abas</div>
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+          Use quando você tem <strong style="color:var(--text)">uma planilha com várias abas</strong> e quer cada uma delas
+          como um arquivo CSV separado. Basta arrastar o arquivo — cada aba vira um CSV pronto pra baixar
+          individualmente ou todas juntas em um ZIP.
+        </p>
+      </div>
+
+      <div class="mt-22">
+        <div class="section-title" style="margin-bottom:6px;"><span id="helpCompileIcon"></span>Compilar Planilhas</div>
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:10px;">
+          Use quando você tem <strong style="color:var(--text)">vários arquivos XLSX separados</strong> (ex: um relatório
+          por mês, ou um por unidade) e quer juntar tudo numa única base de dados. Antes de processar, você configura
+          quais campos extrair de cada arquivo:
+        </p>
+        <ul style="font-size:12.5px;color:var(--text-secondary);line-height:1.8;padding-left:18px;list-style:disc;">
+          <li><strong style="color:var(--text)">Célula fixa</strong> — um valor específico da planilha (ex: sempre o nome da empresa na célula B2)</li>
+          <li><strong style="color:var(--text)">Coluna da tabela</strong> — um valor por linha (ex: a coluna com o nome de cada produto)</li>
+          <li><strong style="color:var(--text)">Valor fixo</strong> — um texto que você digita, igual em todas as linhas</li>
+        </ul>
+        <p style="font-size:12.5px;color:var(--text-secondary);line-height:1.6;margin-top:8px;">
+          Depois de processar, dá pra buscar, ordenar clicando no cabeçalho da coluna, e exportar o resultado em CSV ou XLSX.
+        </p>
+      </div>
+
+      <div class="mt-22">
+        <div class="section-title" style="margin-bottom:6px;"><span id="helpSegmentIcon"></span>Segmentar Dados</div>
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:10px;">
+          Use quando cada linha da sua planilha representa um <strong style="color:var(--text)">intervalo numérico</strong>
+          (ex: um trecho de rodovia do km 10 ao km 50) e você precisa quebrar esse intervalo em pedaços menores e iguais
+          (ex: de 100 em 100 metros).
+        </p>
+        <ul style="font-size:12.5px;color:var(--text-secondary);line-height:1.8;padding-left:18px;list-style:disc;">
+          <li><strong style="color:var(--text)">Fonte dos dados</strong> — importe uma planilha existente, ou monte a tabela na mão se não tiver uma</li>
+          <li><strong style="color:var(--text)">Coluna de início / fim</strong> — quais colunas guardam o começo e o fim de cada intervalo</li>
+          <li><strong style="color:var(--text)">Passo</strong> — o tamanho de cada pedaço gerado (ex: 0,100 divide de 100 em 100 unidades)</li>
+        </ul>
+        <p style="font-size:12.5px;color:var(--text-secondary);line-height:1.6;margin-top:8px;">
+          Ao processar, cada linha original vira várias linhas menores, uma por segmento — mantendo os demais dados da linha.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="segRenameModal">
   <div class="modal-box" style="max-width:380px;">
     <div class="modal-head">
@@ -411,7 +472,16 @@ document.getElementById('tabSegmentBtn').innerHTML = icon('ruler','width="16" he
 document.getElementById('segTabImportBtn').innerHTML = icon('upload','width="14" height="14"') + ' Importar planilha';
 document.getElementById('segTabManualBtn').innerHTML = icon('table','width="14" height="14"') + ' Montar manualmente';
 document.getElementById('segDzIcon').innerHTML = icon('cloud-upload','width="24" height="24"');
+document.getElementById('helpBtnIcon').innerHTML = icon('circle-help','width="18" height="18"');
+document.getElementById('helpModalIcon').innerHTML = icon('circle-help','width="17" height="17"');
+document.getElementById('helpXIcon').innerHTML = icon('x','width="19" height="19"');
+document.getElementById('helpExtractIcon').innerHTML = icon('scissors','width="15" height="15"');
+document.getElementById('helpCompileIcon').innerHTML = icon('layers','width="15" height="15"');
+document.getElementById('helpSegmentIcon').innerHTML = icon('ruler','width="15" height="15"');
 document.getElementById('segManualIcon').innerHTML = icon('table','width="16" height="16"');
+document.getElementById('segSourceIcon').innerHTML = icon('upload','width="16" height="16"');
+document.getElementById('segConfigIcon').innerHTML = icon('sliders-horizontal','width="16" height="16"');
+document.getElementById('segResultIcon').innerHTML = icon('table','width="16" height="16"');
 document.getElementById('segAddColIcon').innerHTML = icon('plus','width="13" height="13"');
 document.getElementById('segAddRowIcon').innerHTML = icon('list-plus','width="13" height="13"');
 document.getElementById('segProcessIcon').innerHTML = icon('play','width="15" height="15"');
@@ -462,6 +532,11 @@ function showToast(message, type){
 }
 
 /* Tabs */
+/* Modal de Ajuda */
+document.getElementById('helpBtn').addEventListener('click', ()=> document.getElementById('helpModal').classList.add('open'));
+document.getElementById('helpCloseBtn').addEventListener('click', ()=> document.getElementById('helpModal').classList.remove('open'));
+document.getElementById('helpModal').addEventListener('click', e=>{ if(e.target.id==='helpModal') document.getElementById('helpModal').classList.remove('open'); });
+
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -1237,25 +1312,31 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     const body = document.getElementById('segTableBody');
     head.innerHTML = segColumns.map(c=> `
       <th data-col="${c}">
-        <span class="th-inner">${c}
-          <button type="button" data-act="rename" data-col="${c}" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:10px;margin-left:6px;">✎</button>
-          <button type="button" data-act="delete" data-col="${c}" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:10px;">✕</button>
+        <span class="th-inner" style="justify-content:space-between;width:100%;">
+          <span>${c}</span>
+          <span style="display:flex;gap:2px;">
+            <button type="button" class="icon-btn" data-act="rename" data-col="${c}" title="Renomear coluna" style="width:22px;height:22px;">${icon('square-pen','width="11" height="11"')}</button>
+            <button type="button" class="icon-btn danger" data-act="delete" data-col="${c}" title="Excluir coluna" style="width:22px;height:22px;">${icon('x','width="11" height="11"')}</button>
+          </span>
         </span>
       </th>
     `).join('');
     head.querySelectorAll('[data-act="rename"]').forEach(b=> b.addEventListener('click', ()=> openRenameModal(b.dataset.col)));
     head.querySelectorAll('[data-act="delete"]').forEach(b=> b.addEventListener('click', ()=> deleteSegColumn(b.dataset.col)));
+    if (window.lucide) window.lucide.createIcons();
 
     if (!segRawData.length){
-      body.innerHTML = `<tr><td colspan="${Math.max(segColumns.length,1)}" style="text-align:center;padding:34px;color:var(--text-secondary);">Nenhum dado ainda. Importe uma planilha ou monte manualmente.</td></tr>`;
+      body.innerHTML = `<tr><td colspan="${Math.max(segColumns.length,1)}" class="empty-hint">Nenhum dado ainda. Importe uma planilha ou monte manualmente.</td></tr>`;
       return;
     }
 
     body.innerHTML = segRawData.map((row,i)=> `
-      <tr>${segColumns.map(c=> `<td><input type="text" value="${(row[c] ?? '').toString().replace(/"/g,'&quot;')}" data-row="${i}" data-col="${c}" style="width:100%;background:transparent;border:none;color:var(--text);font-size:12.5px;"></td>`).join('')}</tr>
+      <tr>${segColumns.map(c=> `<td><input type="text" value="${(row[c] ?? '').toString().replace(/"/g,'&quot;')}" data-row="${i}" data-col="${c}" style="width:100%;background:transparent;border:none;color:var(--text);font-size:12.5px;padding:2px;"></td>`).join('')}</tr>
     `).join('');
     body.querySelectorAll('input').forEach(inp=>{
       inp.addEventListener('change', ()=>{ segRawData[inp.dataset.row][inp.dataset.col] = inp.value; });
+      inp.addEventListener('focus', ()=> inp.style.background='var(--surface)');
+      inp.addEventListener('blur', ()=> inp.style.background='transparent');
     });
   }
 
