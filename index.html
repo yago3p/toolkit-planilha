@@ -43,6 +43,10 @@ header.app-header{display:flex;align-items:center;justify-content:space-between;
 .panel{display:none;}
 .panel.active{display:block;}
 
+.subtab-btn{appearance:none;border:1px solid var(--border);background:var(--surface-2);color:var(--text-secondary);font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;padding:8px 16px;cursor:pointer;border-radius:9px;display:flex;align-items:center;gap:7px;transition:all .15s ease;}
+.subtab-btn:hover{color:var(--text);border-color:#2a3a4d;}
+.subtab-btn.active{color:var(--accent);border-color:rgba(0,212,255,.4);background:var(--accent-dim);}
+
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
 .dropzone{border:2px dashed var(--border);border-radius:var(--radius);padding:40px 24px;text-align:center;cursor:pointer;transition:border-color .2s ease,background .2s ease;background:var(--surface);}
 .dropzone:hover,.dropzone.drag-active{border-color:var(--accent);background:var(--accent-dim);}
@@ -185,6 +189,7 @@ footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(-
   <div class="tabs">
     <button class="tab-btn active" data-tab="extract" id="tabExtractBtn"></button>
     <button class="tab-btn" data-tab="compile" id="tabCompileBtn"></button>
+    <button class="tab-btn" data-tab="segment" id="tabSegmentBtn"></button>
   </div>
 
   <!-- ============ ABA: EXTRAIR ABAS ============ -->
@@ -276,8 +281,70 @@ footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(-
     </div>
   </div>
 
+  <!-- ============ ABA: SEGMENTAR DADOS ============ -->
+  <div class="panel" id="panel-segment">
+
+    <div class="tabs" style="border-bottom:none; margin-bottom:16px;">
+      <button class="subtab-btn active" data-segsubtab="import" id="segTabImportBtn"></button>
+      <button class="subtab-btn" data-segsubtab="manual" id="segTabManualBtn"></button>
+    </div>
+
+    <div id="seg-panel-import">
+      <div id="segDropZone" class="dropzone">
+        <input type="file" id="segFileInput" accept=".csv,.xlsx,.xlsm,.xlsb" class="hidden">
+        <div class="dz-icon" id="segDzIcon"></div>
+        <h2>Arraste sua planilha aqui ou clique para selecionar</h2>
+        <p>Importe uma base para segmentar por intervalo numérico</p>
+      </div>
+    </div>
+
+    <div id="seg-panel-manual" class="hidden">
+      <div class="card" style="padding:16px;">
+        <div class="section-title" style="margin:0 0 12px;"><span id="segManualIcon"></span>Montar tabela manualmente</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="text" id="segNewColName" placeholder="Nome da nova coluna" style="max-width:220px;">
+          <button class="btn btn-secondary btn-sm" id="segAddColBtn"><span id="segAddColIcon"></span><span>Adicionar coluna</span></button>
+          <button class="btn btn-secondary btn-sm" id="segAddRowBtn"><span id="segAddRowIcon"></span><span>Nova linha</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-16" style="padding:20px;">
+      <div class="options-grid" style="grid-template-columns:repeat(5,1fr);align-items:end;">
+        <div>
+          <label class="field-label">Coluna início</label>
+          <select id="segStartCol"></select>
+        </div>
+        <div>
+          <label class="field-label">Coluna fim</label>
+          <select id="segEndCol"></select>
+        </div>
+        <div>
+          <label class="field-label">Passo</label>
+          <input type="text" id="segStepSize" value="0,100">
+        </div>
+        <button class="btn btn-primary" id="segProcessBtn"><span id="segProcessIcon"></span><span>Processar</span></button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-success btn-sm" id="segExportXlsxBtn" style="flex:1;"><span id="segXlsxIcon"></span><span>XLSX</span></button>
+          <button class="btn btn-secondary btn-sm" id="segExportCsvBtn" style="flex:1;"><span id="segCsvIcon"></span><span>CSV</span></button>
+        </div>
+      </div>
+      <p id="segStepHint" class="mt-10" style="font-size:11.5px;color:var(--text-secondary);"></p>
+    </div>
+
+    <div class="card mt-16" style="overflow:hidden;">
+      <div class="table-wrap">
+        <table>
+          <thead><tr id="segTableHeaderRow"></tr></thead>
+          <tbody id="segTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <footer class="app-footer" id="appFooter"></footer>
 </div>
+
 
 <!-- ============ MODAL: CONFIGURAR CAMPOS ============ -->
 <div class="modal-overlay" id="configModal">
@@ -314,6 +381,20 @@ footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(-
   </div>
 </div>
 
+<div class="modal-overlay" id="segRenameModal">
+  <div class="modal-box" style="max-width:380px;">
+    <div class="modal-head">
+      <h3><span id="segRenameIcon"></span>Renomear coluna</h3>
+      <button class="modal-close-x" id="segRenameCloseBtn"><span id="segRenameXIcon"></span></button>
+    </div>
+    <label class="field-label">Novo nome</label>
+    <input type="text" id="segRenameInput">
+    <div class="modal-foot">
+      <button class="btn btn-primary btn-sm" id="segRenameConfirmBtn">Renomear</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast">
   <div class="toast-inner"><span id="toastIcon"></span><span id="toastMessage">Notificação</span></div>
 </div>
@@ -326,6 +407,16 @@ document.getElementById('brandIcon').innerHTML = icon('table-properties','width=
 document.getElementById('localBadge').innerHTML = icon('shield-check','width="13" height="13"') + ' 100% local e seguro';
 document.getElementById('tabExtractBtn').innerHTML = icon('scissors','width="16" height="16"') + ' Extrair abas';
 document.getElementById('tabCompileBtn').innerHTML = icon('layers','width="16" height="16"') + ' Compilar planilhas';
+document.getElementById('tabSegmentBtn').innerHTML = icon('ruler','width="16" height="16"') + ' Segmentar dados';
+document.getElementById('segTabImportBtn').innerHTML = icon('upload','width="14" height="14"') + ' Importar planilha';
+document.getElementById('segTabManualBtn').innerHTML = icon('table','width="14" height="14"') + ' Montar manualmente';
+document.getElementById('segDzIcon').innerHTML = icon('cloud-upload','width="24" height="24"');
+document.getElementById('segManualIcon').innerHTML = icon('table','width="16" height="16"');
+document.getElementById('segAddColIcon').innerHTML = icon('plus','width="13" height="13"');
+document.getElementById('segAddRowIcon').innerHTML = icon('list-plus','width="13" height="13"');
+document.getElementById('segProcessIcon').innerHTML = icon('play','width="15" height="15"');
+document.getElementById('segXlsxIcon').innerHTML = icon('file-spreadsheet','width="13" height="13"');
+document.getElementById('segCsvIcon').innerHTML = icon('file-text','width="13" height="13"');
 document.getElementById('exDzIcon').innerHTML = icon('cloud-upload','width="24" height="24"');
 document.getElementById('exTag1').innerHTML = icon('check','width="12" height="12"') + ' Divide abas automaticamente';
 document.getElementById('exTag2').innerHTML = icon('check','width="12" height="12"') + ' Sem upload para servidores';
@@ -1015,6 +1106,237 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   });
 
   updateFieldsSummary();
+})();
+
+/* ===================== ABA 3: SEGMENTAR DADOS ===================== */
+(function(){
+  document.getElementById('segRenameIcon').innerHTML = icon('square-pen','width="17" height="17"');
+  document.getElementById('segRenameXIcon').innerHTML = icon('x','width="19" height="19"');
+
+  let segRawData = [];
+  let segColumns = [];
+  let renamingColumn = null;
+
+  const subImportBtn = document.getElementById('segTabImportBtn');
+  const subManualBtn = document.getElementById('segTabManualBtn');
+  const panelImport = document.getElementById('seg-panel-import');
+  const panelManual = document.getElementById('seg-panel-manual');
+
+  function switchSegSubTab(target){
+    subImportBtn.classList.toggle('active', target==='import');
+    subManualBtn.classList.toggle('active', target==='manual');
+    panelImport.classList.toggle('hidden', target!=='import');
+    panelManual.classList.toggle('hidden', target!=='manual');
+  }
+
+  subImportBtn.addEventListener('click', ()=>{
+    if (subManualBtn.classList.contains('active')) switchSegSubTab('import');
+  });
+  subManualBtn.addEventListener('click', ()=>{
+    if (subImportBtn.classList.contains('active')){
+      // Corrige um bug do app original: trocar pra "Manual" apagava dados
+      // importados sem aviso nenhum. Agora só limpa com confirmação explícita.
+      if (segRawData.length > 0){
+        if (!confirm('Trocar para o modo manual vai limpar os dados importados. Deseja continuar?')) return;
+      }
+      segRawData = []; segColumns = [];
+      updateSegControls(); renderSegTable();
+    }
+    switchSegSubTab('manual');
+  });
+
+  const dropZone = document.getElementById('segDropZone');
+  const fileInput = document.getElementById('segFileInput');
+
+  dropZone.addEventListener('click', ()=> fileInput.click());
+  ['dragenter','dragover'].forEach(ev=> dropZone.addEventListener(ev, e=>{ e.preventDefault(); dropZone.classList.add('drag-active'); }));
+  ['dragleave','drop'].forEach(ev=> dropZone.addEventListener(ev, e=>{ e.preventDefault(); dropZone.classList.remove('drag-active'); }));
+  dropZone.addEventListener('drop', e=> handleSegFile(e.dataTransfer.files[0]));
+  fileInput.addEventListener('change', ()=>{ handleSegFile(fileInput.files[0]); fileInput.value=''; });
+
+  function handleSegFile(file){
+    if (!file) return;
+    if (!/\.(csv|xlsx|xlsm|xlsb)$/i.test(file.name)){
+      showToast('Formato não suportado. Use .csv, .xlsx, .xlsm ou .xlsb.', 'warning');
+      return;
+    }
+    showToast('Lendo planilha...', 'info');
+    const reader = new FileReader();
+    reader.onload = e=>{
+      try{
+        const workbook = XLSX.read(e.target.result, { type:'binary' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        segRawData = XLSX.utils.sheet_to_json(sheet);
+        segColumns = segRawData.length ? Object.keys(segRawData[0]) : [];
+        updateSegControls();
+        renderSegTable();
+        showToast(`${segRawData.length} linha(s) carregada(s).`, 'success');
+      }catch(err){
+        console.error(err);
+        showToast('Erro ao ler o arquivo. Verifique se não está corrompido.', 'error');
+      }
+    };
+    reader.onerror = ()=> showToast('Falha ao ler o arquivo.', 'error');
+    reader.readAsBinaryString(file);
+  }
+
+  function updateSegControls(){
+    ['segStartCol','segEndCol'].forEach(id=>{
+      const el = document.getElementById(id);
+      el.innerHTML = segColumns.map(c=> `<option value="${c}">${c}</option>`).join('');
+    });
+  }
+
+  document.getElementById('segAddColBtn').addEventListener('click', ()=>{
+    const input = document.getElementById('segNewColName');
+    const name = input.value.trim();
+    if (!name){ showToast('Digite um nome para a coluna.', 'warning'); return; }
+    if (segColumns.includes(name)){ showToast('Já existe uma coluna com esse nome.', 'warning'); return; }
+    segColumns.push(name);
+    segRawData.forEach(r=> r[name] = '');
+    input.value = '';
+    updateSegControls();
+    renderSegTable();
+  });
+
+  document.getElementById('segAddRowBtn').addEventListener('click', ()=>{
+    if (!segColumns.length){ showToast('Adicione ao menos uma coluna primeiro.', 'warning'); return; }
+    segRawData.push(segColumns.reduce((acc,col)=> ({...acc,[col]:''}), {}));
+    renderSegTable();
+  });
+
+  function openRenameModal(oldName){
+    renamingColumn = oldName;
+    document.getElementById('segRenameInput').value = oldName;
+    document.getElementById('segRenameModal').classList.add('open');
+    document.getElementById('segRenameInput').focus();
+  }
+  function closeRenameModal(){ document.getElementById('segRenameModal').classList.remove('open'); renamingColumn = null; }
+  document.getElementById('segRenameCloseBtn').addEventListener('click', closeRenameModal);
+  document.getElementById('segRenameModal').addEventListener('click', e=>{ if(e.target.id==='segRenameModal') closeRenameModal(); });
+  document.getElementById('segRenameConfirmBtn').addEventListener('click', ()=>{
+    const newName = document.getElementById('segRenameInput').value.trim();
+    if (!newName || newName === renamingColumn){ closeRenameModal(); return; }
+    if (segColumns.includes(newName)){ showToast('Já existe uma coluna com esse nome.', 'warning'); return; }
+    segColumns = segColumns.map(c=> c===renamingColumn ? newName : c);
+    segRawData.forEach(r=>{ r[newName]=r[renamingColumn]; delete r[renamingColumn]; });
+    updateSegControls();
+    renderSegTable();
+    closeRenameModal();
+  });
+
+  function deleteSegColumn(col){
+    segColumns = segColumns.filter(c=> c!==col);
+    segRawData.forEach(r=> delete r[col]);
+    updateSegControls();
+    renderSegTable();
+  }
+
+  function renderSegTable(){
+    const head = document.getElementById('segTableHeaderRow');
+    const body = document.getElementById('segTableBody');
+    head.innerHTML = segColumns.map(c=> `
+      <th data-col="${c}">
+        <span class="th-inner">${c}
+          <button type="button" data-act="rename" data-col="${c}" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:10px;margin-left:6px;">✎</button>
+          <button type="button" data-act="delete" data-col="${c}" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:10px;">✕</button>
+        </span>
+      </th>
+    `).join('');
+    head.querySelectorAll('[data-act="rename"]').forEach(b=> b.addEventListener('click', ()=> openRenameModal(b.dataset.col)));
+    head.querySelectorAll('[data-act="delete"]').forEach(b=> b.addEventListener('click', ()=> deleteSegColumn(b.dataset.col)));
+
+    if (!segRawData.length){
+      body.innerHTML = `<tr><td colspan="${Math.max(segColumns.length,1)}" style="text-align:center;padding:34px;color:var(--text-secondary);">Nenhum dado ainda. Importe uma planilha ou monte manualmente.</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = segRawData.map((row,i)=> `
+      <tr>${segColumns.map(c=> `<td><input type="text" value="${(row[c] ?? '').toString().replace(/"/g,'&quot;')}" data-row="${i}" data-col="${c}" style="width:100%;background:transparent;border:none;color:var(--text);font-size:12.5px;"></td>`).join('')}</tr>
+    `).join('');
+    body.querySelectorAll('input').forEach(inp=>{
+      inp.addEventListener('change', ()=>{ segRawData[inp.dataset.row][inp.dataset.col] = inp.value; });
+    });
+  }
+
+  document.getElementById('segStepSize').addEventListener('input', updateStepHint);
+  function updateStepHint(){
+    const raw = document.getElementById('segStepSize').value.replace(',', '.');
+    const step = parseFloat(raw);
+    const hintEl = document.getElementById('segStepHint');
+    if (isNaN(step) || step <= 0){
+      hintEl.textContent = 'Informe um passo maior que zero (ex: 0,100) para processar.';
+      hintEl.style.color = 'var(--warning)';
+    } else {
+      hintEl.textContent = `Cada linha será dividida em intervalos de ${step}.`;
+      hintEl.style.color = 'var(--text-secondary)';
+    }
+  }
+  updateStepHint();
+
+  document.getElementById('segProcessBtn').addEventListener('click', ()=>{
+    const startKey = document.getElementById('segStartCol').value;
+    const endKey = document.getElementById('segEndCol').value;
+    const step = parseFloat(document.getElementById('segStepSize').value.replace(',', '.'));
+
+    if (!startKey || !endKey){ showToast('Selecione as colunas de início e fim.', 'warning'); return; }
+    // Bug corrigido: o app original travava o navegador num loop infinito
+    // se o passo fosse 0 ou negativo. Agora bloqueia antes de processar.
+    if (isNaN(step) || step <= 0){
+      showToast('O passo precisa ser um número maior que zero.', 'error');
+      return;
+    }
+
+    const processed = [];
+    let skipped = 0;
+    segRawData.forEach(row=>{
+      let start = parseFloat(String(row[startKey] ?? 0).replace(',', '.'));
+      let end = parseFloat(String(row[endKey] ?? 0).replace(',', '.'));
+      if (isNaN(start) || isNaN(end)){ skipped++; return; }
+
+      let cur = start;
+      let guard = 0;
+      while (cur < end && guard < 200000){
+        let next = Math.min(cur + step, end);
+        processed.push({ ...row, [startKey]: cur.toFixed(3).replace('.', ','), [endKey]: next.toFixed(3).replace('.', ',') });
+        cur = next;
+        guard++;
+      }
+    });
+
+    segRawData = processed;
+    renderSegTable();
+
+    if (skipped > 0) showToast(`Processado. ${skipped} linha(s) ignorada(s) por início/fim inválido.`, 'warning');
+    else showToast(`Processado! ${processed.length} segmento(s) gerado(s).`, 'success');
+  });
+
+  function getSegOutputName(ext){
+    return `segmentos_processados.${ext}`;
+  }
+
+  document.getElementById('segExportXlsxBtn').addEventListener('click', ()=>{
+    if (!segRawData.length){ showToast('Não há dados para exportar.', 'warning'); return; }
+    const ws = XLSX.utils.json_to_sheet(segRawData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Segmentos');
+    XLSX.writeFile(wb, getSegOutputName('xlsx'));
+    showToast('XLSX exportado!', 'success');
+  });
+
+  document.getElementById('segExportCsvBtn').addEventListener('click', ()=>{
+    if (!segRawData.length){ showToast('Não há dados para exportar.', 'warning'); return; }
+    const ws = XLSX.utils.json_to_sheet(segRawData);
+    const csv = '\uFEFF' + XLSX.utils.sheet_to_csv(ws);
+    const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = getSegOutputName('csv');
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('CSV exportado!', 'success');
+  });
+
+  renderSegTable();
 })();
 
 lucide.createIcons();
