@@ -568,7 +568,18 @@ footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(-
       A mesma chave apareceu mais de uma vez dentro de uma planilha. Escolha, para cada grupo, se o cruzamento deve
       considerar <strong>todas as combinações</strong> (o resultado pode ganhar mais linhas) ou <strong>apenas a primeira ocorrência</strong>.
     </p>
-    <div id="xrDupGroups"></div>
+
+    <div class="card" id="xrDupBulkBar" style="padding:13px 15px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--accent-dim);border:1px solid rgba(0,212,255,.3);">
+      <span style="font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;display:flex;align-items:center;gap:6px;"><span id="xrDupBulkIcon"></span>Resolver todos os grupos de uma vez:</span>
+      <select id="xrDupBulkSelect" style="max-width:280px;flex:1;min-width:200px;">
+        <option value="cartesian">Cruzar com todas as combinações</option>
+        <option value="first">Manter apenas a primeira ocorrência</option>
+      </select>
+      <button type="button" class="btn btn-secondary btn-sm" id="xrDupBulkApplyBtn">Aplicar a todos</button>
+      <button type="button" class="btn btn-primary btn-sm" id="xrDupBulkApplyContinueBtn">Aplicar a todos e concluir</button>
+    </div>
+
+    <div id="xrDupGroups" style="max-height:42vh;overflow-y:auto;padding-right:6px;"></div>
     <div class="modal-foot">
       <button class="btn btn-primary btn-sm" id="xrDupApplyBtn">Aplicar e continuar</button>
     </div>
@@ -599,6 +610,7 @@ document.getElementById('xrSearchIcon').innerHTML = icon('search','width="14" he
 document.getElementById('xrCsvIcon').innerHTML = icon('file-text','width="13" height="13"');
 document.getElementById('xrXlsxIcon').innerHTML = icon('file-spreadsheet','width="13" height="13"');
 document.getElementById('xrDupModalIcon').innerHTML = icon('alert-triangle','width="17" height="17"');
+document.getElementById('xrDupBulkIcon').innerHTML = icon('zap','width="13" height="13"');
 document.getElementById('xrDupXIcon').innerHTML = icon('x','width="19" height="19"');
 document.getElementById('segTabImportBtn').innerHTML = icon('upload','width="14" height="14"') + ' Importar planilha';
 document.getElementById('segTabManualBtn').innerHTML = icon('table','width="14" height="14"') + ' Montar manualmente';
@@ -1767,13 +1779,32 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   }
   document.getElementById('xrDupCloseBtn').addEventListener('click', ()=> dupModal.classList.remove('open'));
   dupModal.addEventListener('click', e=>{ if (e.target.id==='xrDupModal') dupModal.classList.remove('open'); });
-  document.getElementById('xrDupApplyBtn').addEventListener('click', ()=>{
+
+  function readResolutionsFromUI(){
     dupGroupsEl.querySelectorAll('.xr-dup-group').forEach(el=>{
       const sheet = crossSheets.find(s=> s.id===el.dataset.sheet);
       const gidx = parseInt(el.dataset.gidx,10);
       const sel = el.querySelector('[data-act="resolution"]');
       sheet.dupGroups[gidx].resolution = sel.value;
     });
+  }
+
+  document.getElementById('xrDupBulkApplyBtn').addEventListener('click', ()=>{
+    const bulkValue = document.getElementById('xrDupBulkSelect').value;
+    dupGroupsEl.querySelectorAll('.xr-dup-group [data-act="resolution"]').forEach(sel=> sel.value = bulkValue);
+    showToast('Resolução aplicada a todos os grupos. Revise ou clique em "Aplicar e continuar".', 'success');
+  });
+
+  document.getElementById('xrDupBulkApplyContinueBtn').addEventListener('click', ()=>{
+    const bulkValue = document.getElementById('xrDupBulkSelect').value;
+    dupGroupsEl.querySelectorAll('.xr-dup-group [data-act="resolution"]').forEach(sel=> sel.value = bulkValue);
+    readResolutionsFromUI();
+    dupModal.classList.remove('open');
+    runJoin();
+  });
+
+  document.getElementById('xrDupApplyBtn').addEventListener('click', ()=>{
+    readResolutionsFromUI();
     dupModal.classList.remove('open');
     runJoin();
   });
