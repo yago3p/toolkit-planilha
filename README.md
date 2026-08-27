@@ -1,6 +1,6 @@
 # Toolkit Planilhas
 
-Extraia abas de uma planilha como CSVs individuais, compile múltiplos arquivos XLSX em uma base única com mapeamento de campos 100% configurável, ou segmente dados por intervalo numérico — tudo direto no navegador.
+Extraia abas de uma planilha como CSVs individuais, compile múltiplos arquivos XLSX em uma base única com mapeamento de campos 100% configurável, cruze planilhas diferentes por uma chave em comum, ou segmente dados por intervalo numérico — tudo direto no navegador.
 
 ![status](https://img.shields.io/badge/status-ativo-4ADE80) ![stack](https://img.shields.io/badge/stack-HTML%20%2F%20JS-00D4FF) ![license](https://img.shields.io/badge/license-MIT-8B98A5)
 
@@ -18,6 +18,15 @@ Extraia abas de uma planilha como CSVs individuais, compile múltiplos arquivos 
   - Importação/exportação da configuração de campos em JSON, para reaproveitar em outras compilações
   - Busca, ordenação por coluna e paginação nos resultados
   - Exportação para CSV ou XLSX consolidado
+- **Cruzar planilhas** — una duas ou mais planilhas horizontalmente (tipo um `JOIN`), cruzando pelos dados que elas têm em comum:
+  - Cada aba de cada arquivo enviado vira uma planilha independente, configurável em um card próprio
+  - Chave de amarração composta (uma ou mais colunas por planilha, sem precisar ter o mesmo nome entre as planilhas)
+  - Por planilha: decide se ela mantém linhas mesmo sem correspondência nas outras, ou só entra quando há match
+  - Campos de saída configuráveis por planilha (incluir, renomear, tipo de dado), igual à aba Compilar
+  - Reordenação das planilhas (define a ordem de prioridade do cruzamento)
+  - Normalização flexível da chave (ignora maiúsculas/minúsculas e espaços extras), com opção de comparação exata
+  - Detecção de chaves duplicadas dentro da mesma planilha, com escolha entre cruzar todas as combinações ou manter apenas a primeira ocorrência
+  - Resultado com indicação de correspondência completa ou parcial, busca, ordenação e exportação para CSV ou XLSX
 - **Segmentar dados** — importe uma planilha (ou monte uma tabela manualmente) e divida cada linha em segmentos por intervalo numérico, com passo configurável:
   - Colunas de início/fim e passo escolhidos livremente
   - Edição inline de colunas e linhas, com renomear/excluir coluna
