@@ -163,32 +163,28 @@ tbody tr:hover{background:var(--surface-2);}
 .seg-btn.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(0,212,255,.4);}
 .modal-foot{display:flex;justify-content:flex-end;border-top:1px solid var(--border);padding-top:14px;margin-top:6px;}
 
-.xr-card{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);margin-bottom:12px;overflow:hidden;}
-.xr-card-head{display:flex;align-items:center;gap:10px;padding:13px 15px;cursor:pointer;background:var(--surface-2);}
-.xr-card-head .grow{flex:1;min-width:0;}
-.xr-card-head .name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.xr-card-head .sub{font-size:11px;color:var(--text-secondary);margin-top:2px;}
-.xr-card-head .chev{transition:transform .15s ease;color:var(--text-secondary);}
-.xr-card-head .chev.open{transform:rotate(180deg);}
-.xr-card-body{padding:16px;border-top:1px solid var(--border);display:none;}
-.xr-card-body.open{display:block;}
-.xr-subtitle{font-size:11.5px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.03em;margin:0 0 8px;display:flex;align-items:center;gap:6px;}
-.xr-field-row{display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;margin-bottom:7px;flex-wrap:wrap;}
-.xr-field-row .colname{flex:0 0 150px;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.xr-field-row input[type=text]{flex:1;min-width:120px;}
-.xr-field-row select{width:130px;flex-shrink:0;}
-.xr-status-pill{padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:700;}
-.xr-status-pill.complete{background:var(--success-dim);color:var(--success);}
-.xr-status-pill.partial{background:var(--warning-dim);color:var(--warning);}
-.xr-dup-group{border:1px solid var(--border);border-radius:11px;padding:12px 14px;margin-bottom:10px;background:var(--surface-2);}
-.xr-dup-group .hd{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
-.xr-dup-group .hd .k{font-size:12.5px;font-weight:600;}
-.xr-dup-group .hd .n{font-size:11px;color:var(--text-secondary);}
-
 .toast{position:fixed;bottom:24px;right:24px;z-index:80;transform:translateY(24px);opacity:0;pointer-events:none;transition:all .25s ease;max-width:360px;}
 .toast.show{transform:translateY(0);opacity:1;}
 .toast-inner{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 16px;border-radius:11px;box-shadow:0 12px 30px rgba(0,0,0,.4);font-size:13px;font-weight:500;}
 .toast-inner svg{width:17px;height:17px;flex-shrink:0;}
+
+.un-file-card{border:1px solid var(--border);border-radius:12px;background:var(--surface-2);margin-bottom:10px;overflow:hidden;}
+.un-file-card-head{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;}
+.un-file-card-body{padding:0 14px 14px;border-top:1px solid var(--border);}
+.un-file-card-body.collapsed{display:none;}
+.un-count-badge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--accent-dim);color:var(--accent);white-space:nowrap;}
+.un-count-badge.zero{background:var(--surface);color:var(--text-secondary);}
+.un-sheet-chip-group{display:flex;flex-wrap:wrap;gap:7px;padding-top:14px;}
+.un-sheet-chip{padding:7px 13px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text-secondary);font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s ease;}
+.un-sheet-chip svg{width:12px;height:12px;opacity:0;transition:opacity .15s ease;}
+.un-sheet-chip.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(0,212,255,.4);}
+.un-sheet-chip.active svg{opacity:1;}
+.un-sheet-chip.dimmed{opacity:.3;}
+.un-file-quick-actions{display:flex;gap:12px;padding-top:12px;font-size:11px;}
+.un-file-quick-actions button{background:none;border:none;color:var(--accent);cursor:pointer;font-weight:600;padding:0;}
+.un-file-quick-actions button:hover{text-decoration:underline;}
+.icon-btn.rotated svg{transform:rotate(-90deg);}
+.icon-btn svg{transition:transform .18s ease;}
 
 .hidden{display:none !important;}
 .mt-10{margin-top:10px;}.mt-16{margin-top:16px;}.mt-22{margin-top:22px;}
@@ -216,7 +212,7 @@ footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(-
     <button class="tab-btn active" data-tab="extract" id="tabExtractBtn"></button>
     <button class="tab-btn" data-tab="compile" id="tabCompileBtn"></button>
     <button class="tab-btn" data-tab="segment" id="tabSegmentBtn"></button>
-    <button class="tab-btn" data-tab="cross" id="tabCrossBtn"></button>
+    <button class="tab-btn" data-tab="union" id="tabUnionBtn"></button>
   </div>
 
   <!-- ============ ABA: EXTRAIR ABAS ============ -->
@@ -371,77 +367,48 @@ footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(-
     </div>
   </div>
 
-  <!-- ============ ABA: CRUZAR PLANILHAS ============ -->
-  <div class="panel" id="panel-cross">
+  <!-- ============ ABA: UNIR ARQUIVOS ============ -->
+  <div class="panel" id="panel-union">
 
-    <div class="section-title"><span id="xrUploadIcon"></span>1. Envie as planilhas a cruzar</div>
-    <div id="xrDropZone" class="dropzone">
-      <input type="file" id="xrFileInput" multiple accept=".xlsx,.xls" class="hidden">
-      <div class="dz-icon" id="xrDzIcon"></div>
-      <h2>Arraste e solte 2 ou mais arquivos XLSX aqui</h2>
-      <p>Cada aba de cada arquivo vira uma planilha independente para o cruzamento</p>
-      <div class="dz-tags"><span id="xrTag1"></span></div>
-    </div>
-
-    <div id="xrSheetsWrap" class="hidden mt-16">
-      <div class="section-title"><span id="xrConfigIcon"></span>2. Configure cada planilha</div>
-      <p style="font-size:12px;color:var(--text-secondary);margin:-6px 0 14px;">
-        Para cada planilha: marque a(s) coluna(s) que formam a chave de amarração, decida se ela deve manter linhas sem correspondência, e escolha quais campos entram no resultado final.
-      </p>
-      <div id="xrSheetCards"></div>
-
-      <div class="card mt-16" style="padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <label class="field-label" style="margin:0;display:flex;align-items:center;gap:8px;cursor:pointer;">
-            <input type="checkbox" id="xrFlexToggle" checked style="width:auto;">
-            Normalização flexível da chave (ignora maiúsculas/minúsculas, espaços extras e formatação numérica — "0,050" e "00,050" são tratados como o mesmo valor)
-          </label>
-        </div>
-        <button class="btn btn-primary" id="xrProcessBtn"><span id="xrPlayIcon"></span><span>Processar cruzamento</span></button>
-      </div>
-
-      <div id="xrProgressWrap" class="hidden progress-card card mt-16">
-        <div class="progress-row">
-          <span id="xrProgressText">Preparando...</span>
-          <span id="xrProgressPercent">0%</span>
-        </div>
-        <div class="progress-track"><div class="progress-fill" id="xrProgressBar"></div></div>
-        <div style="display:flex;justify-content:flex-end;margin-top:10px;">
-          <button type="button" class="btn btn-secondary btn-sm" id="xrCancelBtn"><span id="xrCancelIcon"></span><span>Cancelar</span></button>
-        </div>
+    <div id="unDropZone" class="dropzone">
+      <input type="file" id="unFileInput" multiple accept=".xlsx,.xls,.csv" class="hidden">
+      <div class="dz-icon" id="unDzIcon"></div>
+      <h2>Arraste seus arquivos aqui ou clique para selecionar</h2>
+      <p>Suporta múltiplos arquivos .xlsx, .xls ou .csv simultaneamente</p>
+      <div class="dz-tags">
+        <span id="unTag1"></span>
+        <span id="unTag2"></span>
       </div>
     </div>
 
-    <div id="xrResultsWrap" class="hidden mt-16">
-      <div class="section-title"><span id="xrResultIcon"></span>3. Resultado</div>
-      <div class="results-toolbar card">
+    <div id="unEmptyState" class="card empty-hint mt-16">
+      Nenhum arquivo carregado ainda. Envie um ou mais arquivos acima para escolher quais abas unir.
+    </div>
+
+    <div id="unSelectionArea" class="hidden mt-16">
+
+      <div class="card results-toolbar">
         <div class="search-wrap">
-          <span id="xrSearchIcon"></span>
-          <input type="text" id="xrSearchInput" placeholder="Buscar em qualquer campo...">
+          <span id="unSearchIcon"></span>
+          <input type="text" id="unSearchInput" placeholder="Buscar arquivo ou aba...">
         </div>
-        <span class="summary-text" id="xrResultsSummary"></span>
         <div class="toolbar-actions">
-          <input type="text" id="xrOutputName" placeholder="Nome do arquivo de saída">
-          <button class="btn btn-secondary btn-sm" id="xrExportCsvBtn"><span id="xrCsvIcon"></span><span>CSV</span></button>
-          <button class="btn btn-success btn-sm" id="xrExportXlsxBtn"><span id="xrXlsxIcon"></span><span>XLSX</span></button>
+          <button class="btn btn-secondary btn-sm" id="unExpandAllBtn"><span id="unExpandIcon"></span><span>Expandir todos</span></button>
+          <button class="btn btn-secondary btn-sm" id="unCollapseAllBtn"><span id="unCollapseIcon"></span><span>Recolher todos</span></button>
+          <button class="btn btn-secondary btn-sm" id="unSelectAllBtn"><span id="unCheckAllIcon"></span><span>Selecionar todas</span></button>
+          <button class="btn btn-secondary btn-sm" id="unDeselectAllBtn"><span id="unUncheckAllIcon"></span><span>Desmarcar todas</span></button>
+          <button class="btn btn-secondary btn-sm" id="unClearFilesBtn"><span id="unClearIcon"></span><span>Limpar tudo</span></button>
         </div>
       </div>
 
-      <div class="card mt-16" style="overflow:hidden;">
-        <div class="table-wrap">
-          <table>
-            <thead><tr id="xrTableHeaderRow"></tr></thead>
-            <tbody id="xrTableBody"></tbody>
-          </table>
+      <div id="unFilesList" class="mt-16"></div>
+
+      <div class="card mt-16" style="display:flex;flex-wrap:wrap;align-items:end;gap:14px;padding:18px 16px;">
+        <div style="flex:1;min-width:220px;">
+          <label class="field-label">Nome do arquivo final</label>
+          <input type="text" id="unOutputFilename" value="planilha_unida.xlsx">
         </div>
-        <div class="table-footer">
-          <div>Mostrando <strong id="xrPagStart">0</strong> a <strong id="xrPagEnd">0</strong> de <strong id="xrPagTotal">0</strong> registros</div>
-          <div class="pager">
-            <button class="btn btn-secondary btn-sm" id="xrPrevPage">Anterior</button>
-            <span>Página <span id="xrCurrentPage">1</span> de <span id="xrTotalPages">1</span></span>
-            <button class="btn btn-secondary btn-sm" id="xrNextPage">Próxima</button>
-          </div>
-        </div>
+        <button class="btn btn-primary" id="unCompileBtn"><span id="unCompileIcon"></span><span>Unir e baixar</span></button>
       </div>
     </div>
   </div>
@@ -537,17 +504,20 @@ footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(-
       </div>
 
       <div class="mt-22">
-        <div class="section-title" style="margin-bottom:6px;"><span id="helpCrossIcon"></span>Cruzar Planilhas</div>
+        <div class="section-title" style="margin-bottom:6px;"><span id="helpUnionIcon"></span>Unir Arquivos</div>
         <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:10px;">
-          Use quando você tem <strong style="color:var(--text)">duas ou mais planilhas com um dado em comum</strong>
-          (ex: nome, matrícula, código) e quer uni-las horizontalmente numa única tabela, tipo um <em>JOIN</em>.
-          Diferente da aba Compilar (que empilha linhas), aqui as colunas de planilhas diferentes se juntam na mesma linha.
+          Use quando você quer <strong style="color:var(--text)">juntar abas inteiras de vários arquivos num único arquivo</strong>,
+          mantendo cada aba exatamente como está — sem misturar os dados numa tabela só. É diferente do "Compilar Planilhas":
+          ali você extrai campos específicos linha a linha; aqui você simplesmente empacota abas completas juntas.
         </p>
         <ul style="font-size:12.5px;color:var(--text-secondary);line-height:1.8;padding-left:18px;list-style:disc;">
-          <li><strong style="color:var(--text)">Chave de amarração</strong> — uma ou mais colunas que identificam o mesmo registro em cada planilha</li>
-          <li><strong style="color:var(--text)">Manter sem correspondência</strong> — se ligado, a planilha nunca filtra linhas do resultado; se desligado, só entram linhas com correspondência nela</li>
-          <li><strong style="color:var(--text)">Chaves duplicadas</strong> — se a mesma chave aparecer mais de uma vez na mesma planilha, você decide se quer todas as combinações ou só a primeira</li>
+          <li>Envie quantos arquivos quiser — cada um vira um card que você pode <strong style="color:var(--text)">recolher</strong> pra não poluir a tela</li>
+          <li>Cada aba do arquivo vira um <strong style="color:var(--text)">botão clicável</strong> — clique pra marcar/desmarcar quais entram no resultado final</li>
+          <li>Use a <strong style="color:var(--text)">busca</strong> pra achar rápido um arquivo ou aba específica quando tiver muitos carregados</li>
         </ul>
+        <p style="font-size:12.5px;color:var(--text-secondary);line-height:1.6;margin-top:8px;">
+          O resultado é um único arquivo XLSX com todas as abas selecionadas dentro — se duas abas tiverem o mesmo nome, o sistema renomeia automaticamente pra não sobrescrever.
+        </p>
       </div>
 
     </div>
@@ -568,35 +538,6 @@ footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(-
   </div>
 </div>
 
-<!-- ============ MODAL: CHAVES DUPLICADAS ============ -->
-<div class="modal-overlay" id="xrDupModal">
-  <div class="modal-box">
-    <div class="modal-head">
-      <h3><span id="xrDupModalIcon"></span>Chaves duplicadas encontradas</h3>
-      <button class="modal-close-x" id="xrDupCloseBtn"><span id="xrDupXIcon"></span></button>
-    </div>
-    <p class="modal-desc">
-      A mesma chave apareceu mais de uma vez dentro de uma planilha. Escolha, para cada grupo, se o cruzamento deve
-      considerar <strong>todas as combinações</strong> (o resultado pode ganhar mais linhas) ou <strong>apenas a primeira ocorrência</strong>.
-    </p>
-
-    <div class="card" id="xrDupBulkBar" style="padding:13px 15px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--accent-dim);border:1px solid rgba(0,212,255,.3);">
-      <span style="font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;display:flex;align-items:center;gap:6px;"><span id="xrDupBulkIcon"></span>Resolver todos os grupos de uma vez:</span>
-      <select id="xrDupBulkSelect" style="max-width:280px;flex:1;min-width:200px;">
-        <option value="cartesian">Cruzar com todas as combinações</option>
-        <option value="first">Manter apenas a primeira ocorrência</option>
-      </select>
-      <button type="button" class="btn btn-secondary btn-sm" id="xrDupBulkApplyBtn">Aplicar a todos</button>
-      <button type="button" class="btn btn-primary btn-sm" id="xrDupBulkApplyContinueBtn">Aplicar a todos e concluir</button>
-    </div>
-
-    <div id="xrDupGroups" style="max-height:42vh;overflow-y:auto;padding-right:6px;"></div>
-    <div class="modal-foot">
-      <button class="btn btn-primary btn-sm" id="xrDupApplyBtn">Aplicar e continuar</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast">
   <div class="toast-inner"><span id="toastIcon"></span><span id="toastMessage">Notificação</span></div>
 </div>
@@ -610,20 +551,17 @@ document.getElementById('localBadge').innerHTML = icon('shield-check','width="13
 document.getElementById('tabExtractBtn').innerHTML = icon('scissors','width="16" height="16"') + ' Extrair abas';
 document.getElementById('tabCompileBtn').innerHTML = icon('layers','width="16" height="16"') + ' Compilar planilhas';
 document.getElementById('tabSegmentBtn').innerHTML = icon('ruler','width="16" height="16"') + ' Segmentar dados';
-document.getElementById('tabCrossBtn').innerHTML = icon('combine','width="16" height="16"') + ' Cruzar planilhas';
-document.getElementById('xrUploadIcon').innerHTML = icon('upload','width="16" height="16"');
-document.getElementById('xrConfigIcon').innerHTML = icon('sliders-horizontal','width="16" height="16"');
-document.getElementById('xrResultIcon').innerHTML = icon('table','width="16" height="16"');
-document.getElementById('xrDzIcon').innerHTML = icon('cloud-upload','width="24" height="24"');
-document.getElementById('xrTag1').innerHTML = icon('check','width="12" height="12"') + ' Aceita múltiplos arquivos com múltiplas abas';
-document.getElementById('xrPlayIcon').innerHTML = icon('play','width="15" height="15"');
-document.getElementById('xrSearchIcon').innerHTML = icon('search','width="14" height="14"');
-document.getElementById('xrCsvIcon').innerHTML = icon('file-text','width="13" height="13"');
-document.getElementById('xrXlsxIcon').innerHTML = icon('file-spreadsheet','width="13" height="13"');
-document.getElementById('xrDupModalIcon').innerHTML = icon('alert-triangle','width="17" height="17"');
-document.getElementById('xrDupBulkIcon').innerHTML = icon('zap','width="13" height="13"');
-document.getElementById('xrCancelIcon').innerHTML = icon('x','width="13" height="13"');
-document.getElementById('xrDupXIcon').innerHTML = icon('x','width="19" height="19"');
+document.getElementById('tabUnionBtn').innerHTML = icon('merge','width="16" height="16"') + ' Unir arquivos';
+document.getElementById('unDzIcon').innerHTML = icon('cloud-upload','width="22" height="22"');
+document.getElementById('unTag1').innerHTML = icon('check','width="12" height="12"') + ' Arquivos ilimitados';
+document.getElementById('unTag2').innerHTML = icon('check','width="12" height="12"') + ' Sem upload para servidores';
+document.getElementById('unSearchIcon').innerHTML = icon('search','width="14" height="14"');
+document.getElementById('unExpandIcon').innerHTML = icon('maximize-2','width="13" height="13"');
+document.getElementById('unCollapseIcon').innerHTML = icon('minimize-2','width="13" height="13"');
+document.getElementById('unCheckAllIcon').innerHTML = icon('check-check','width="13" height="13"');
+document.getElementById('unUncheckAllIcon').innerHTML = icon('x','width="13" height="13"');
+document.getElementById('unClearIcon').innerHTML = icon('trash-2','width="13" height="13"');
+document.getElementById('unCompileIcon').innerHTML = icon('download','width="16" height="16"');
 document.getElementById('segTabImportBtn').innerHTML = icon('upload','width="14" height="14"') + ' Importar planilha';
 document.getElementById('segTabManualBtn').innerHTML = icon('table','width="14" height="14"') + ' Montar manualmente';
 document.getElementById('segDzIcon').innerHTML = icon('cloud-upload','width="24" height="24"');
@@ -633,7 +571,7 @@ document.getElementById('helpXIcon').innerHTML = icon('x','width="19" height="19
 document.getElementById('helpExtractIcon').innerHTML = icon('scissors','width="15" height="15"');
 document.getElementById('helpCompileIcon').innerHTML = icon('layers','width="15" height="15"');
 document.getElementById('helpSegmentIcon').innerHTML = icon('ruler','width="15" height="15"');
-document.getElementById('helpCrossIcon').innerHTML = icon('combine','width="15" height="15"');
+document.getElementById('helpUnionIcon').innerHTML = icon('merge','width="15" height="15"');
 document.getElementById('segManualIcon').innerHTML = icon('table','width="16" height="16"');
 document.getElementById('segSourceIcon').innerHTML = icon('upload','width="16" height="16"');
 document.getElementById('segConfigIcon').innerHTML = icon('sliders-horizontal','width="16" height="16"');
@@ -1576,584 +1514,239 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   renderSegTable();
 })();
 
-/* ===================== ABA 4: CRUZAR PLANILHAS ===================== */
+/* ===================== ABA 4: UNIR ARQUIVOS ===================== */
 (function(){
-  const DATA_TYPES_XR = [
-    { value:'text', label:'Texto' },
-    { value:'number', label:'Número' },
-    { value:'currency', label:'Moeda (R$)' },
-    { value:'date', label:'Data' },
-    { value:'latitude', label:'Latitude' },
-    { value:'longitude', label:'Longitude' }
-  ];
-  const NUMERIC_TYPES_XR = ['number','currency','latitude','longitude'];
+  let unFiles = []; // { id, name, workbook, sheetNames, selectedSheets:Set, collapsed:bool }
+  let unSearchTerm = '';
 
-  let crossSheets = [];
-  let crossResultData = [];
-  let crossFilteredData = [];
-  let crossCurrentPage = 1;
-  const crossPageSize = 50;
-  let crossSortKey = null, crossSortAsc = true;
-  let sheetIdCounter = 0;
+  const unDropZone = document.getElementById('unDropZone');
+  const unFileInput = document.getElementById('unFileInput');
+  const unEmptyState = document.getElementById('unEmptyState');
+  const unSelectionArea = document.getElementById('unSelectionArea');
+  const unFilesList = document.getElementById('unFilesList');
 
-  const dropZone = document.getElementById('xrDropZone');
-  const fileInput = document.getElementById('xrFileInput');
-  const sheetsWrap = document.getElementById('xrSheetsWrap');
-  const sheetCardsEl = document.getElementById('xrSheetCards');
-  const processBtn = document.getElementById('xrProcessBtn');
-  const flexToggle = document.getElementById('xrFlexToggle');
-  const resultsWrap = document.getElementById('xrResultsWrap');
-  const searchInput = document.getElementById('xrSearchInput');
-  const resultsSummary = document.getElementById('xrResultsSummary');
-  const outputNameInput = document.getElementById('xrOutputName');
-  const headerRow = document.getElementById('xrTableHeaderRow');
-  const tableBody = document.getElementById('xrTableBody');
-  const dupModal = document.getElementById('xrDupModal');
-  const dupGroupsEl = document.getElementById('xrDupGroups');
-  const progressWrap = document.getElementById('xrProgressWrap');
-  const progressBar = document.getElementById('xrProgressBar');
-  const progressText = document.getElementById('xrProgressText');
-  const progressPercent = document.getElementById('xrProgressPercent');
-  const cancelBtn = document.getElementById('xrCancelBtn');
-  let xrWorker = null;
+  unDropZone.addEventListener('click', ()=> unFileInput.click());
+  ['dragenter','dragover'].forEach(ev=> unDropZone.addEventListener(ev, e=>{ e.preventDefault(); unDropZone.classList.add('drag-active'); }));
+  ['dragleave','drop'].forEach(ev=> unDropZone.addEventListener(ev, e=>{ e.preventDefault(); unDropZone.classList.remove('drag-active'); }));
+  unDropZone.addEventListener('drop', e=> handleUnFiles(e.dataTransfer.files));
+  unFileInput.addEventListener('change', ()=>{ handleUnFiles(unFileInput.files); unFileInput.value=''; });
 
-  dropZone.addEventListener('click', ()=> fileInput.click());
-  fileInput.addEventListener('change', ()=>{ addXrFiles(Array.from(fileInput.files)); fileInput.value=''; });
-  ['dragenter','dragover'].forEach(ev=> dropZone.addEventListener(ev, e=>{ e.preventDefault(); dropZone.classList.add('drag-active'); }));
-  ['dragleave','drop'].forEach(ev=> dropZone.addEventListener(ev, e=>{ e.preventDefault(); dropZone.classList.remove('drag-active'); }));
-  dropZone.addEventListener('drop', e=> addXrFiles(Array.from(e.dataTransfer.files)));
+  function handleUnFiles(fileListInput){
+    const list = Array.from(fileListInput);
+    if (!list.length) return;
+    let loaded = 0;
+    const total = list.length;
+    let errors = [];
 
-  async function addXrFiles(files){
-    const valid = files.filter(f=> /\.(xlsx|xls)$/i.test(f.name));
-    if (!valid.length){ showToast('Selecione arquivos com extensão .xlsx ou .xls.', 'warning'); return; }
-    for (const file of valid){
-      try{
-        const buf = await file.arrayBuffer();
-        const workbook = XLSX.read(buf, { type:'array', cellDates:true });
-        workbook.SheetNames.forEach(sheetName=>{
-          const sheet = workbook.Sheets[sheetName];
-          const rows = XLSX.utils.sheet_to_json(sheet, { header:1, defval:'' });
-          if (!rows.length) return;
-          const headerRowRaw = rows[0].map(h=> String(h??'').trim());
-          if (!headerRowRaw.some(h=> h!=='')) return;
-          const dataRows = rows.slice(1).filter(r=> r && r.some(v=> String(v??'').trim()!==''));
-          if (!dataRows.length) return;
-          const headers = headerRowRaw.map((h,i)=> h || `Coluna ${i+1}`);
-          crossSheets.push({
-            id: 'xrsheet_'+(++sheetIdCounter),
-            fileName: file.name,
-            sheetName,
-            headers,
-            rawRows: dataRows,
-            keyCols: new Set(),
-            keepUnmatched: true,
-            fields: headers.map((h,idx)=> ({ colIdx:idx, outputName:h, include:true, dataType:'text' })),
-            dupGroups: [],
-            open: true
+    list.forEach(file=>{
+      const reader = new FileReader();
+      reader.onload = e=>{
+        try{
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type:'array' });
+          unFiles.push({
+            id: 'unfile_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+            name: file.name,
+            workbook,
+            sheetNames: workbook.SheetNames,
+            selectedSheets: new Set(workbook.SheetNames),
+            collapsed: false
           });
-        });
-      }catch(err){
-        console.error('Erro ao ler '+file.name, err);
-        showToast(`Erro ao ler o arquivo ${file.name}.`, 'error');
-      }
-    }
-    renderSheetCards();
-  }
-
-  function removeSheet(id){ crossSheets = crossSheets.filter(s=> s.id!==id); renderSheetCards(); }
-  function moveSheet(id, dir){
-    const idx = crossSheets.findIndex(s=> s.id===id);
-    const newIdx = idx+dir;
-    if (newIdx<0 || newIdx>=crossSheets.length) return;
-    const [item] = crossSheets.splice(idx,1);
-    crossSheets.splice(newIdx,0,item);
-    renderSheetCards();
-  }
-
-  function renderSheetCards(){
-    sheetsWrap.classList.toggle('hidden', crossSheets.length===0);
-    sheetCardsEl.innerHTML = crossSheets.map((s,idx)=>{
-      const keyLabel = s.keyCols.size ? [...s.keyCols].map(i=> s.headers[i]).join(' + ') : 'nenhuma coluna selecionada';
-      return `
-      <div class="xr-card" data-id="${s.id}">
-        <div class="xr-card-head" data-act="toggle">
-          <span>${icon('file-spreadsheet','width="16" height="16"')}</span>
-          <div class="grow">
-            <div class="name">${s.fileName} <span style="color:var(--text-secondary);font-weight:500;">› ${s.sheetName}</span></div>
-            <div class="sub">Chave: ${keyLabel} · ${s.rawRows.length.toLocaleString('pt-BR')} linha(s) · ${s.keepUnmatched? 'mantém sem correspondência':'só com correspondência'}</div>
-          </div>
-          <button type="button" class="icon-btn" data-act="up" title="Mover para cima" ${idx===0?'disabled':''}>${icon('chevron-up','width="14" height="14"')}</button>
-          <button type="button" class="icon-btn" data-act="down" title="Mover para baixo" ${idx===crossSheets.length-1?'disabled':''}>${icon('chevron-down','width="14" height="14"')}</button>
-          <button type="button" class="icon-btn danger" data-act="remove" title="Remover planilha">${icon('trash-2','width="14" height="14"')}</button>
-          <span class="chev ${s.open?'open':''}">${icon('chevron-down','width="16" height="16"')}</span>
-        </div>
-        <div class="xr-card-body ${s.open?'open':''}">
-          <div class="xr-subtitle">${icon('key','width="12" height="12"')} Coluna(s)-chave (marque uma ou mais)</div>
-          <div class="seg-group mt-10">
-            ${s.headers.map((h,i)=> `<button type="button" class="seg-btn ${s.keyCols.has(i)?'active':''}" data-act="key" data-idx="${i}">${s.keyCols.has(i)?icon('check','width="11" height="11"'):''} ${h}</button>`).join('')}
-          </div>
-
-          <div class="xr-subtitle mt-16">${icon('git-branch','width="12" height="12"')} Comportamento sem correspondência</div>
-          <label class="field-label" style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500;">
-            <input type="checkbox" data-act="keepUnmatched" ${s.keepUnmatched?'checked':''} style="width:auto;">
-            Manter linhas desta planilha mesmo sem correspondência nas outras
-          </label>
-
-          <div class="xr-subtitle mt-16">${icon('columns-3','width="12" height="12"')} Campos de saída</div>
-          ${s.fields.map(f=> `
-            <div class="xr-field-row" data-fieldidx="${f.colIdx}">
-              <input type="checkbox" data-act="include" ${f.include?'checked':''} style="width:auto;flex-shrink:0;">
-              <span class="colname" title="${s.headers[f.colIdx]}">${s.headers[f.colIdx]}${s.keyCols.has(f.colIdx)?' <span style="color:var(--accent);font-size:10px;">(chave)</span>':''}</span>
-              <input type="text" data-act="rename" value="${f.outputName}" placeholder="Nome de saída">
-              <select data-act="dtype">
-                ${DATA_TYPES_XR.map(dt=> `<option value="${dt.value}" ${f.dataType===dt.value?'selected':''}>${dt.label}</option>`).join('')}
-              </select>
-            </div>
-          `).join('')}
-        </div>
-      </div>`;
-    }).join('');
-
-    sheetCardsEl.querySelectorAll('.xr-card').forEach(card=>{
-      const id = card.dataset.id;
-      const s = crossSheets.find(x=> x.id===id);
-      card.querySelector('[data-act="toggle"]').addEventListener('click', e=>{
-        if (e.target.closest('button')) return;
-        s.open = !s.open; renderSheetCards();
-      });
-      card.querySelector('[data-act="up"]').addEventListener('click', ()=> moveSheet(id,-1));
-      card.querySelector('[data-act="down"]').addEventListener('click', ()=> moveSheet(id,1));
-      card.querySelector('[data-act="remove"]').addEventListener('click', ()=> removeSheet(id));
-      card.querySelectorAll('[data-act="key"]').forEach(btn=>{
-        btn.addEventListener('click', ()=>{
-          const i = parseInt(btn.dataset.idx,10);
-          if (s.keyCols.has(i)) s.keyCols.delete(i); else s.keyCols.add(i);
-          renderSheetCards();
-        });
-      });
-      const keepChk = card.querySelector('[data-act="keepUnmatched"]');
-      if (keepChk) keepChk.addEventListener('change', ()=>{ s.keepUnmatched = keepChk.checked; renderSheetCards(); });
-      card.querySelectorAll('.xr-field-row').forEach(row=>{
-        const colIdx = parseInt(row.dataset.fieldidx,10);
-        const field = s.fields.find(f=> f.colIdx===colIdx);
-        row.querySelector('[data-act="include"]').addEventListener('change', e=>{ field.include = e.target.checked; });
-        row.querySelector('[data-act="rename"]').addEventListener('input', e=>{ field.outputName = e.target.value; });
-        row.querySelector('[data-act="dtype"]').addEventListener('change', e=>{ field.dataType = e.target.value; });
-      });
-    });
-    lucide.createIcons();
-  }
-
-  function normalizeVal(v, flexible){
-    if (v===undefined || v===null) return '';
-    let s = String(v);
-    if (v instanceof Date) s = v.toISOString().slice(0,10);
-    s = s.trim();
-    if (!flexible) return s;
-    s = s.toLowerCase();
-    // Reconhece valores numéricos escritos com vírgula decimal (padrão BR) e/ou
-    // zeros à esquerda (ex: "0,050" e "00,050") e normaliza para uma forma
-    // canônica, para que representem a mesma chave.
-    if (/^-?\d{1,3}(\.\d{3})*(,\d+)?$/.test(s) || /^-?\d+(,\d+)?$/.test(s)){
-      const asDot = s.replace(/\./g,'').replace(',', '.');
-      const n = parseFloat(asDot);
-      if (!isNaN(n)) return String(Math.round(n*1e6)/1e6);
-    }
-    return s;
-  }
-  function buildKey(row, keyCols, flexible){
-    return [...keyCols].sort((a,b)=>a-b).map(i=> normalizeVal(row[i], flexible)).join('\u0001');
-  }
-
-  function detectDuplicates(){
-    const flexible = flexToggle.checked;
-    let anyUnresolved = false;
-    crossSheets.forEach(s=>{
-      if (!s.keyCols.size){ s.dupGroups = []; return; }
-      const map = new Map();
-      s.rawRows.forEach((row,idx)=>{
-        const k = buildKey(row, s.keyCols, flexible);
-        if (!k) return;
-        if (!map.has(k)) map.set(k, []);
-        map.get(k).push(idx);
-      });
-      const existing = new Map((s.dupGroups||[]).map(g=> [g.keyStr, g.resolution]));
-      s.dupGroups = [...map.entries()].filter(([,idxs])=> idxs.length>1).map(([keyStr,indexes])=> ({
-        keyStr, indexes, resolution: existing.get(keyStr) || null
-      }));
-      if (s.dupGroups.some(g=> !g.resolution)) anyUnresolved = true;
-    });
-    return anyUnresolved;
-  }
-
-  function openDupModal(){
-    dupGroupsEl.innerHTML = crossSheets.filter(s=> s.dupGroups.length).map(s=> `
-      <div style="margin-bottom:14px;">
-        <div class="xr-subtitle">${s.fileName} › ${s.sheetName}</div>
-        ${s.dupGroups.map((g,gi)=> `
-          <div class="xr-dup-group" data-sheet="${s.id}" data-gidx="${gi}">
-            <div class="hd">
-              <span class="k">Chave: "${g.keyStr.split('\u0001').join(' + ')}"</span>
-              <span class="n">${g.indexes.length} linhas repetidas</span>
-            </div>
-            <select data-act="resolution" style="max-width:320px;">
-              <option value="cartesian" ${g.resolution==='cartesian'?'selected':''}>Cruzar com todas as combinações</option>
-              <option value="first" ${g.resolution==='first'?'selected':''}>Manter apenas a primeira ocorrência</option>
-            </select>
-          </div>
-        `).join('')}
-      </div>
-    `).join('');
-    dupModal.classList.add('open');
-  }
-  document.getElementById('xrDupCloseBtn').addEventListener('click', ()=> dupModal.classList.remove('open'));
-  dupModal.addEventListener('click', e=>{ if (e.target.id==='xrDupModal') dupModal.classList.remove('open'); });
-
-  function readResolutionsFromUI(){
-    dupGroupsEl.querySelectorAll('.xr-dup-group').forEach(el=>{
-      const sheet = crossSheets.find(s=> s.id===el.dataset.sheet);
-      const gidx = parseInt(el.dataset.gidx,10);
-      const sel = el.querySelector('[data-act="resolution"]');
-      sheet.dupGroups[gidx].resolution = sel.value;
-    });
-  }
-
-  document.getElementById('xrDupBulkApplyBtn').addEventListener('click', ()=>{
-    const bulkValue = document.getElementById('xrDupBulkSelect').value;
-    dupGroupsEl.querySelectorAll('.xr-dup-group [data-act="resolution"]').forEach(sel=> sel.value = bulkValue);
-    showToast('Resolução aplicada a todos os grupos. Revise ou clique em "Aplicar e continuar".', 'success');
-  });
-
-  document.getElementById('xrDupBulkApplyContinueBtn').addEventListener('click', ()=>{
-    const bulkValue = document.getElementById('xrDupBulkSelect').value;
-    dupGroupsEl.querySelectorAll('.xr-dup-group [data-act="resolution"]').forEach(sel=> sel.value = bulkValue);
-    readResolutionsFromUI();
-    dupModal.classList.remove('open');
-    runJoin();
-  });
-
-  document.getElementById('xrDupApplyBtn').addEventListener('click', ()=>{
-    readResolutionsFromUI();
-    dupModal.classList.remove('open');
-    runJoin();
-  });
-
-  /* Motor de cálculo do cruzamento, rodando em Web Worker (não trava a aba) */
-  function xrWorkerMain(){
-    self.onmessage = function(e){
-      try{
-        const { sheets, flexible } = e.data;
-
-        function normalizeVal(v){
-          if (v===undefined || v===null) return '';
-          let s = String(v).trim();
-          if (!flexible) return s;
-          s = s.toLowerCase();
-          if (/^-?\d{1,3}(\.\d{3})*(,\d+)?$/.test(s) || /^-?\d+(,\d+)?$/.test(s)){
-            const asDot = s.replace(/\./g,'').replace(',', '.');
-            const n = parseFloat(asDot);
-            if (!isNaN(n)) return String(Math.round(n*1e6)/1e6);
-          }
-          return s;
+        }catch(err){
+          console.error(err);
+          errors.push(file.name);
         }
-        function buildKey(row, keyCols){
-          return keyCols.slice().sort((a,b)=>a-b).map(i=> normalizeVal(row[i])).join('\u0001');
+        loaded++;
+        if (loaded === total){
+          updateUnUI();
+          if (errors.length) showToast(`Erro ao ler: ${errors.join(', ')}`, 'error');
+          else showToast(`${total} arquivo(s) carregado(s)!`, 'success');
         }
-        function parseVal(raw, dataType){
-          if (raw===undefined || raw===null || String(raw).trim()==='') return null;
-          switch(dataType){
-            case 'number': case 'currency': case 'latitude': case 'longitude': {
-              if (typeof raw==='number') return raw;
-              const n = parseFloat(String(raw).replace(/\./g,'').replace(',', '.'));
-              return isNaN(n) ? null : n;
-            }
-            case 'date': return String(raw).trim();
-            default: return String(raw).trim();
-          }
-        }
-
-        self.postMessage({ type:'progress', text:'Construindo índices...', percent:0 });
-
-        const indexes = sheets.map(s=>{
-          const map = new Map();
-          s.rawRows.forEach((row,idx)=>{
-            const k = buildKey(row, s.keyCols);
-            if (!k) return;
-            if (!map.has(k)) map.set(k, []);
-            map.get(k).push(idx);
-          });
-          Object.keys(s.dupResolutions||{}).forEach(keyStr=>{
-            if (s.dupResolutions[keyStr]==='first' && map.has(keyStr)) map.set(keyStr, [map.get(keyStr)[0]]);
-          });
-          return map;
-        });
-
-        const allKeys = new Set();
-        indexes.forEach(map=> map.forEach((_,k)=> allKeys.add(k)));
-
-        let finalKeys = [...allKeys];
-        sheets.forEach((s,i)=>{ if (!s.keepUnmatched) finalKeys = finalKeys.filter(k=> indexes[i].has(k)); });
-
-        if (!finalKeys.length){ self.postMessage({ type:'done', result: [] }); return; }
-
-        const CHUNK = 1500;
-        const result = [];
-        for (let start=0; start<finalKeys.length; start+=CHUNK){
-          const chunk = finalKeys.slice(start, start+CHUNK);
-          chunk.forEach(k=>{
-            const rowIndexLists = sheets.map((s,i)=> indexes[i].get(k) || [null]);
-            let combos = [[]];
-            rowIndexLists.forEach(list=>{
-              const next = [];
-              combos.forEach(c=> list.forEach(v=> next.push(c.concat([v]))));
-              combos = next;
-            });
-            combos.forEach(combo=>{
-              const rowObj = {};
-              const matchFlags = {};
-              sheets.forEach((s,i)=>{
-                const rIdx = combo[i];
-                matchFlags[s.id] = rIdx!==null;
-                const row = rIdx!==null ? s.rawRows[rIdx] : null;
-                s.fields.forEach(f=>{
-                  if (!f.include) return;
-                  const raw = row ? row[f.colIdx] : null;
-                  rowObj[s.id+'__'+f.colIdx] = parseVal(raw, f.dataType);
-                });
-              });
-              rowObj.__matched = matchFlags;
-              result.push(rowObj);
-            });
-          });
-          const processed = Math.min(start+CHUNK, finalKeys.length);
-          const percent = Math.round(processed/finalKeys.length*100);
-          self.postMessage({ type:'progress', text:'Cruzando registros: '+processed.toLocaleString('pt-BR')+' de '+finalKeys.length.toLocaleString('pt-BR')+' chaves ('+result.length.toLocaleString('pt-BR')+' linhas geradas)', percent });
-        }
-
-        self.postMessage({ type:'done', result: result });
-      }catch(err){
-        self.postMessage({ type:'error', message: (err && err.message) || String(err) });
-      }
-    };
-  }
-
-  function getOrCreateXrWorker(){
-    if (xrWorker) return xrWorker;
-    const src = '(' + xrWorkerMain.toString() + ')();';
-    const blob = new Blob([src], { type:'text/javascript' });
-    xrWorker = new Worker(URL.createObjectURL(blob));
-    return xrWorker;
-  }
-
-  function resetXrProgressUI(){
-    progressWrap.classList.add('hidden');
-    progressBar.style.width = '0%';
-    progressPercent.textContent = '0%';
-    progressText.textContent = 'Preparando...';
-    processBtn.disabled = false;
-  }
-
-  cancelBtn.addEventListener('click', ()=>{
-    if (xrWorker){ xrWorker.terminate(); xrWorker = null; }
-    resetXrProgressUI();
-    showToast('Processamento cancelado.', 'warning');
-  });
-
-  function runJoin(){
-    const flexible = flexToggle.checked;
-    if (crossSheets.length < 2){ showToast('Envie ao menos 2 planilhas para cruzar.', 'warning'); return; }
-    if (crossSheets.some(s=> !s.keyCols.size)){ showToast('Defina a coluna-chave de todas as planilhas.', 'warning'); return; }
-
-    const payloadSheets = crossSheets.map(s=>{
-      const dupResolutions = {};
-      (s.dupGroups||[]).forEach(g=>{ if (g.resolution) dupResolutions[g.keyStr] = g.resolution; });
-      return {
-        id: s.id,
-        keepUnmatched: s.keepUnmatched,
-        keyCols: [...s.keyCols],
-        rawRows: s.rawRows,
-        fields: s.fields.map(f=> ({ colIdx:f.colIdx, outputName:f.outputName, include:f.include, dataType:f.dataType })),
-        dupResolutions
       };
+      reader.onerror = ()=>{
+        errors.push(file.name);
+        loaded++;
+        if (loaded === total){ updateUnUI(); showToast(`Erro ao ler: ${errors.join(', ')}`, 'error'); }
+      };
+      reader.readAsArrayBuffer(file);
     });
-
-    resultsWrap.classList.add('hidden');
-    progressWrap.classList.remove('hidden');
-    progressBar.style.width = '0%';
-    progressPercent.textContent = '0%';
-    progressText.textContent = 'Preparando...';
-    processBtn.disabled = true;
-
-    const worker = getOrCreateXrWorker();
-    worker.onmessage = (e)=>{
-      const msg = e.data;
-      if (msg.type==='progress'){
-        progressText.textContent = msg.text;
-        progressBar.style.width = msg.percent+'%';
-        progressPercent.textContent = msg.percent+'%';
-      } else if (msg.type==='done'){
-        resetXrProgressUI();
-        if (!msg.result.length){ showToast('Nenhuma correspondência encontrada com as chaves configuradas.', 'warning'); return; }
-        crossResultData = msg.result;
-        crossFilteredData = [...crossResultData];
-        crossCurrentPage = 1;
-        resultsWrap.classList.remove('hidden');
-        const partial = crossResultData.filter(r=> Object.values(r.__matched).some(v=> !v)).length;
-        resultsSummary.textContent = `${crossResultData.length.toLocaleString('pt-BR')} registro(s) — ${(crossResultData.length-partial).toLocaleString('pt-BR')} completo(s), ${partial.toLocaleString('pt-BR')} parcial(is).`;
-        renderXrHeader();
-        renderXrTable();
-        showToast('Cruzamento concluído!', 'success');
-      } else if (msg.type==='error'){
-        resetXrProgressUI();
-        showToast('Erro ao processar o cruzamento: '+msg.message, 'error');
-      }
-    };
-    worker.onerror = (err)=>{
-      resetXrProgressUI();
-      showToast('Erro ao processar o cruzamento.', 'error');
-      console.error(err);
-    };
-    worker.postMessage({ sheets: payloadSheets, flexible });
   }
 
-  processBtn.addEventListener('click', ()=>{
-    if (detectDuplicates()){ openDupModal(); return; }
-    runJoin();
+  function updateUnUI(){
+    const hasFiles = unFiles.length > 0;
+    unEmptyState.classList.toggle('hidden', hasFiles);
+    unSelectionArea.classList.toggle('hidden', !hasFiles);
+    if (hasFiles) renderUnFilesList();
+  }
+
+  document.getElementById('unSearchInput').addEventListener('input', e=>{
+    unSearchTerm = e.target.value.trim().toLowerCase();
+    renderUnFilesList();
   });
 
-  function getXrColumns(){
-    const cols = [{ key:'__status', label:'Status', dataType:'text', align:'left', isStatus:true }];
-    crossSheets.forEach(s=>{
-      s.fields.filter(f=> f.include).forEach(f=>{
-        cols.push({ key:`${s.id}__${f.colIdx}`, label:f.outputName, dataType:f.dataType, align: NUMERIC_TYPES_XR.includes(f.dataType)?'right':'left' });
-      });
-    });
-    return cols;
+  document.getElementById('unExpandAllBtn').addEventListener('click', ()=>{ unFiles.forEach(f=> f.collapsed=false); renderUnFilesList(); });
+  document.getElementById('unCollapseAllBtn').addEventListener('click', ()=>{ unFiles.forEach(f=> f.collapsed=true); renderUnFilesList(); });
+  document.getElementById('unSelectAllBtn').addEventListener('click', ()=>{
+    unFiles.forEach(f=> f.selectedSheets = new Set(f.sheetNames));
+    renderUnFilesList();
+    showToast('Todas as abas selecionadas.', 'success');
+  });
+  document.getElementById('unDeselectAllBtn').addEventListener('click', ()=>{
+    unFiles.forEach(f=> f.selectedSheets.clear());
+    renderUnFilesList();
+    showToast('Todas as abas desmarcadas.', 'info');
+  });
+  document.getElementById('unClearFilesBtn').addEventListener('click', ()=>{
+    if (!confirm('Remover todos os arquivos carregados?')) return;
+    unFiles = [];
+    updateUnUI();
+    showToast('Lista limpa.', 'info');
+  });
+
+  function unTotalSelectedCount(){
+    return unFiles.reduce((sum,f)=> sum + f.selectedSheets.size, 0);
   }
 
-  function renderXrHeader(){
-    const columns = getXrColumns();
-    headerRow.innerHTML = `<th class="idx-col">#</th>` + columns.map(col=>{
-      const alignClass = col.align==='right' ? ' right-align' : '';
-      const isSorted = crossSortKey === col.key;
-      const arrowIcon = isSorted ? (crossSortAsc?'arrow-up':'arrow-down') : 'chevrons-up-down';
-      return `<th class="${isSorted?'sorted':''}${alignClass}" data-key="${col.key}"><span class="th-inner">${col.label} ${col.isStatus?'':icon(arrowIcon,'width="12" height="12"')}</span></th>`;
-    }).join('');
-    headerRow.querySelectorAll('th[data-key]').forEach(th=>{
-      if (th.dataset.key==='__status') return;
-      th.addEventListener('click', ()=> sortXrTable(th.dataset.key));
+  function renderUnFilesList(){
+    const term = unSearchTerm;
+    unFilesList.innerHTML = '';
+    let anyVisible = false;
+
+    unFiles.forEach(f=>{
+      const fileMatches = f.name.toLowerCase().includes(term);
+      const matchingSheets = f.sheetNames.filter(s=> s.toLowerCase().includes(term));
+      const visible = !term || fileMatches || matchingSheets.length > 0;
+      if (!visible) return;
+      anyVisible = true;
+
+      const selectedCount = f.selectedSheets.size;
+      const card = document.createElement('div');
+      card.className = 'un-file-card';
+
+      const chipsHtml = f.sheetNames.map(sheet=>{
+        const isSelected = f.selectedSheets.has(sheet);
+        const matchesSearch = !term || sheet.toLowerCase().includes(term) || fileMatches;
+        return `
+          <button type="button" class="un-sheet-chip ${isSelected?'active':''} ${!matchesSearch?'dimmed':''}" data-file="${f.id}" data-sheet="${sheet.replace(/"/g,'&quot;')}">
+            ${icon('check','width="12" height="12"')}
+            <span>${sheet}</span>
+          </button>
+        `;
+      }).join('');
+
+      card.innerHTML = `
+        <div class="un-file-card-head" data-toggle="${f.id}">
+          <div class="file-thumb">${icon('file-spreadsheet','width="16" height="16"')}</div>
+          <div class="file-meta">
+            <div class="name" title="${f.name}">${f.name}</div>
+            <div class="sub">
+              <span class="un-count-badge ${selectedCount===0?'zero':''}">${selectedCount}/${f.sheetNames.length} selecionada(s)</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <button type="button" class="icon-btn danger" data-remove="${f.id}" title="Remover arquivo">${icon('trash-2','width="14" height="14"')}</button>
+            <button type="button" class="icon-btn ${f.collapsed?'rotated':''}" data-collapse-toggle="${f.id}" title="${f.collapsed?'Expandir':'Recolher'}">${icon('chevron-down','width="16" height="16"')}</button>
+          </div>
+        </div>
+        <div class="un-file-card-body ${f.collapsed?'collapsed':''}" data-body="${f.id}">
+          <div class="un-file-quick-actions">
+            <button type="button" data-file-all="${f.id}">Selecionar todas deste arquivo</button>
+            <button type="button" data-file-none="${f.id}">Nenhuma deste arquivo</button>
+          </div>
+          <div class="un-sheet-chip-group">${chipsHtml}</div>
+        </div>
+      `;
+      unFilesList.appendChild(card);
     });
+
+    if (!anyVisible){
+      unFilesList.innerHTML = `<div class="card empty-hint">Nenhum arquivo ou aba encontrada para "${unSearchTerm}".</div>`;
+    }
+
+    unFilesList.querySelectorAll('[data-toggle]').forEach(head=>{
+      head.addEventListener('click', e=>{
+        if (e.target.closest('[data-remove]') || e.target.closest('[data-collapse-toggle]')) return;
+        toggleUnCollapse(head.dataset.toggle);
+      });
+    });
+    unFilesList.querySelectorAll('[data-collapse-toggle]').forEach(btn=>{
+      btn.addEventListener('click', e=>{ e.stopPropagation(); toggleUnCollapse(btn.dataset.collapseToggle); });
+    });
+    unFilesList.querySelectorAll('[data-remove]').forEach(btn=>{
+      btn.addEventListener('click', e=>{ e.stopPropagation(); removeUnFile(btn.dataset.remove); });
+    });
+    unFilesList.querySelectorAll('.un-sheet-chip').forEach(chip=>{
+      chip.addEventListener('click', ()=> toggleUnSheet(chip.dataset.file, chip.dataset.sheet));
+    });
+    unFilesList.querySelectorAll('[data-file-all]').forEach(btn=>{
+      btn.addEventListener('click', ()=> setUnFileSheets(btn.dataset.fileAll, true));
+    });
+    unFilesList.querySelectorAll('[data-file-none]').forEach(btn=>{
+      btn.addEventListener('click', ()=> setUnFileSheets(btn.dataset.fileNone, false));
+    });
+
     lucide.createIcons();
   }
 
-  function sortXrTable(key){
-    if (crossSortKey===key) crossSortAsc=!crossSortAsc; else { crossSortKey=key; crossSortAsc=true; }
-    const direction = crossSortAsc?1:-1;
-    const col = getXrColumns().find(c=> c.key===key);
-    const numeric = col && NUMERIC_TYPES_XR.includes(col.dataType);
-    crossFilteredData.sort((a,b)=>{
-      let va=a[key], vb=b[key];
-      if (numeric){ va=va==null?-Infinity:va; vb=vb==null?-Infinity:vb; return (va-vb)*direction; }
-      va=va??''; vb=vb??'';
-      return String(va).localeCompare(String(vb),'pt-BR')*direction;
-    });
-    renderXrHeader(); renderXrTable();
+  function toggleUnCollapse(fileId){
+    const f = unFiles.find(x=> x.id===fileId);
+    if (f){ f.collapsed = !f.collapsed; renderUnFilesList(); }
+  }
+  function removeUnFile(fileId){
+    unFiles = unFiles.filter(f=> f.id !== fileId);
+    updateUnUI();
+    showToast('Arquivo removido.', 'info');
+  }
+  function toggleUnSheet(fileId, sheetName){
+    const f = unFiles.find(x=> x.id===fileId);
+    if (!f) return;
+    if (f.selectedSheets.has(sheetName)) f.selectedSheets.delete(sheetName);
+    else f.selectedSheets.add(sheetName);
+    renderUnFilesList();
+  }
+  function setUnFileSheets(fileId, allSelected){
+    const f = unFiles.find(x=> x.id===fileId);
+    if (!f) return;
+    f.selectedSheets = allSelected ? new Set(f.sheetNames) : new Set();
+    renderUnFilesList();
   }
 
-  function formatXrCell(value, dataType){
-    if (value===null || value===undefined || value===''){ return '<span class="empty-cell">—</span>'; }
-    switch(dataType){
-      case 'number': return typeof value==='number' ? value.toLocaleString('pt-BR',{maximumFractionDigits:4}) : value;
-      case 'currency': return typeof value==='number' ? value.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : value;
-      case 'latitude': case 'longitude': return typeof value==='number' ? value.toFixed(6) : value;
-      default: return value;
+  document.getElementById('unCompileBtn').addEventListener('click', ()=>{
+    const total = unTotalSelectedCount();
+    if (total === 0){ showToast('Selecione ao menos uma aba para unir.', 'warning'); return; }
+
+    try{
+      const newWorkbook = XLSX.utils.book_new();
+      const sheetNameCount = {};
+
+      unFiles.forEach(f=>{
+        f.selectedSheets.forEach(sheetName=>{
+          const worksheet = f.workbook.Sheets[sheetName];
+          let finalName = sheetName;
+
+          if (sheetNameCount[sheetName] !== undefined){
+            sheetNameCount[sheetName]++;
+            const base = f.name.substring(0, f.name.lastIndexOf('.')) || f.name;
+            finalName = `${base.substring(0,15)}_${sheetName}`.substring(0,31);
+          } else {
+            sheetNameCount[sheetName] = 1;
+          }
+          if (newWorkbook.SheetNames.includes(finalName)){
+            finalName = `${finalName.substring(0,25)}_${Math.floor(Math.random()*1000)}`;
+          }
+          XLSX.utils.book_append_sheet(newWorkbook, worksheet, finalName);
+        });
+      });
+
+      let outputName = document.getElementById('unOutputFilename').value.trim() || 'planilha_unida';
+      if (!outputName.toLowerCase().endsWith('.xlsx')) outputName += '.xlsx';
+
+      XLSX.writeFile(newWorkbook, outputName);
+      showToast(`"${outputName}" gerado com sucesso!`, 'success');
+    }catch(err){
+      console.error(err);
+      showToast('Erro ao unir os arquivos.', 'error');
     }
-  }
-
-  function renderXrTable(){
-    const total = crossFilteredData.length;
-    const columns = getXrColumns();
-    if (!total){
-      tableBody.innerHTML = `<tr><td colspan="${columns.length+1}" style="text-align:center;padding:34px;color:var(--text-secondary);">Nenhum registro encontrado.</td></tr>`;
-      document.getElementById('xrPagStart').textContent='0'; document.getElementById('xrPagEnd').textContent='0'; document.getElementById('xrPagTotal').textContent='0';
-      return;
-    }
-    const totalPages = Math.ceil(total/crossPageSize);
-    crossCurrentPage = Math.max(1, Math.min(crossCurrentPage, totalPages));
-    const start = (crossCurrentPage-1)*crossPageSize;
-    const end = Math.min(start+crossPageSize, total);
-    const pageData = crossFilteredData.slice(start,end);
-
-    tableBody.innerHTML = pageData.map((d,i)=>{
-      const complete = Object.values(d.__matched).every(v=> v);
-      const cells = columns.map(col=>{
-        if (col.isStatus) return `<td><span class="xr-status-pill ${complete?'complete':'partial'}">${complete?'Completo':'Parcial'}</span></td>`;
-        const alignClass = col.align==='right'?' right-align':'';
-        return `<td class="${alignClass}">${formatXrCell(d[col.key], col.dataType)}</td>`;
-      }).join('');
-      return `<tr><td class="idx-col">${start+i+1}</td>${cells}</tr>`;
-    }).join('');
-
-    document.getElementById('xrPagStart').textContent = (start+1).toLocaleString('pt-BR');
-    document.getElementById('xrPagEnd').textContent = end.toLocaleString('pt-BR');
-    document.getElementById('xrPagTotal').textContent = total.toLocaleString('pt-BR');
-    document.getElementById('xrCurrentPage').textContent = crossCurrentPage;
-    document.getElementById('xrTotalPages').textContent = totalPages;
-    document.getElementById('xrPrevPage').disabled = crossCurrentPage===1;
-    document.getElementById('xrNextPage').disabled = crossCurrentPage===totalPages;
-  }
-
-  document.getElementById('xrPrevPage').addEventListener('click', ()=>{ crossCurrentPage--; renderXrTable(); });
-  document.getElementById('xrNextPage').addEventListener('click', ()=>{ crossCurrentPage++; renderXrTable(); });
-
-  searchInput.addEventListener('input', ()=>{
-    const term = searchInput.value.toLowerCase().trim();
-    crossFilteredData = !term ? [...crossResultData] : crossResultData.filter(item=> Object.entries(item).some(([k,v])=> k!=='__matched' && v!==null && v!==undefined && String(v).toLowerCase().includes(term)));
-    crossCurrentPage = 1;
-    renderXrTable();
-  });
-
-  function getXrOutputName(ext){
-    let base = outputNameInput.value.trim() || `Cruzamento_${new Date().toISOString().slice(0,10)}`;
-    base = base.replace(/[\\/:*?"<>|]+/g,'').trim() || 'Cruzamento';
-    base = base.replace(new RegExp(`\\.${ext}$`,'i'), '');
-    return `${base}.${ext}`;
-  }
-
-  document.getElementById('xrExportXlsxBtn').addEventListener('click', ()=>{
-    if (!crossResultData.length) return;
-    const columns = getXrColumns().filter(c=> !c.isStatus);
-    const rows = crossResultData.map(d=>{
-      const row = { 'Status': Object.values(d.__matched).every(v=>v) ? 'Completo' : 'Parcial' };
-      columns.forEach(col=> row[col.label] = (d[col.key]===null||d[col.key]===undefined) ? '' : d[col.key]);
-      return row;
-    });
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Cruzamento');
-    XLSX.writeFile(wb, getXrOutputName('xlsx'));
-    showToast('XLSX exportado!', 'success');
-  });
-
-  document.getElementById('xrExportCsvBtn').addEventListener('click', ()=>{
-    if (!crossResultData.length) return;
-    const columns = getXrColumns();
-    let csv = '\uFEFF' + columns.map(c=> c.isStatus?'Status':c.label).join(';') + '\n';
-    crossResultData.forEach(d=>{
-      csv += columns.map(col=>{
-        if (col.isStatus) return Object.values(d.__matched).every(v=>v) ? 'Completo' : 'Parcial';
-        const v = d[col.key];
-        if (v===null||v===undefined) return '';
-        if (typeof v==='number') return v;
-        return `"${String(v).replace(/"/g,'""')}"`;
-      }).join(';') + '\n';
-    });
-    const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href=url; a.download=getXrOutputName('csv');
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast('CSV exportado!', 'success');
   });
 })();
 
