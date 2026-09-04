@@ -1434,10 +1434,17 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   }
 
   /* ===== Reconstrução de tabela por coordenada (para Excel) ===== */
-  function buildPageGrid(items, colTolerance){
+  function buildPageGrid(items, viewport, colTolerance){
+    // Transforma cada item pela matriz do viewport (que já embute a rotação /Rotate
+    // da página) — sem isso, uma página girada (por nós ou pelo PDF original) gera
+    // coordenadas na orientação errada e a tabela sai ilegível ou vazia.
     const cleanItems = items
       .filter(it=> it.str && it.str.trim() !== '')
-      .map(it=> ({ str: it.str, x: it.transform[4], y: it.transform[5], height: Math.abs(it.height || 10) }));
+      .map(it=>{
+        const tx = pdfjsLib.Util.transform(viewport.transform, it.transform);
+        const height = Math.hypot(tx[2], tx[3]) || Math.abs(it.height || 10);
+        return { str: it.str, x: tx[4], y: tx[5], height };
+      });
     if (!cleanItems.length) return [];
 
     // Tolerância de linha adaptativa, baseada na altura de fonte típica da página
@@ -1445,15 +1452,16 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     const medianHeight = heights[Math.floor(heights.length/2)] || 10;
     const rowTolerance = Math.max(2, medianHeight * 0.5);
 
-    // Agrupa em linhas por proximidade vertical
+    // Agrupa em linhas por proximidade vertical.
+    // No espaço do viewport, y cresce pra baixo — então topo da página = menor y.
     const rows = [];
-    cleanItems.sort((a,b)=> b.y - a.y || a.x - b.x);
+    cleanItems.sort((a,b)=> a.y - b.y || a.x - b.x);
     cleanItems.forEach(it=>{
       let row = rows.find(r=> Math.abs(r.y - it.y) <= rowTolerance);
       if (!row){ row = { y: it.y, items: [] }; rows.push(row); }
       row.items.push(it);
     });
-    rows.sort((a,b)=> b.y - a.y);
+    rows.sort((a,b)=> a.y - b.y);
 
     // Âncoras de coluna a partir de todas as posições X da página
     const allX = cleanItems.map(it=> it.x).sort((a,b)=> a-b);
@@ -1477,10 +1485,14 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   }
 
   /* ===== Extração de parágrafos (para Word) ===== */
-  function buildPageParagraphs(items){
+  function buildPageParagraphs(items, viewport){
     const cleanItems = items
       .filter(it=> it.str !== undefined)
-      .map(it=> ({ str: it.str, x: it.transform[4], y: it.transform[5], height: Math.abs(it.height || 10) }));
+      .map(it=>{
+        const tx = pdfjsLib.Util.transform(viewport.transform, it.transform);
+        const height = Math.hypot(tx[2], tx[3]) || Math.abs(it.height || 10);
+        return { str: it.str, x: tx[4], y: tx[5], height };
+      });
     if (!cleanItems.length) return [];
 
     const heights = cleanItems.map(it=> it.height).filter(h=>h>0).sort((a,b)=>a-b);
@@ -1488,13 +1500,13 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     const rowTolerance = Math.max(2, medianHeight * 0.5);
 
     const lines = [];
-    cleanItems.sort((a,b)=> b.y - a.y || a.x - b.x);
+    cleanItems.sort((a,b)=> a.y - b.y || a.x - b.x);
     cleanItems.forEach(it=>{
       let line = lines.find(l=> Math.abs(l.y - it.y) <= rowTolerance);
       if (!line){ line = { y: it.y, items: [] }; lines.push(line); }
       line.items.push(it);
     });
-    lines.sort((a,b)=> b.y - a.y);
+    lines.sort((a,b)=> a.y - b.y);
 
     return lines.map(line=>{
       return line.items.sort((a,b)=> a.x - b.x).map(it=> it.str).join(' ').replace(/\s+/g,' ').trim();
@@ -1519,13 +1531,14 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
 
       try{
         const page = await state.pdfDoc.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 1 }); // já embute a rotação /Rotate da página
         const textContent = await page.getTextContent();
 
         if (state.format === 'excel'){
-          const grid = buildPageGrid(textContent.items, colTolerance);
+          const grid = buildPageGrid(textContent.items, viewport, colTolerance);
           state.results.push({ pageNum, grid });
         } else {
-          const paragraphs = buildPageParagraphs(textContent.items);
+          const paragraphs = buildPageParagraphs(textContent.items, viewport);
           state.results.push({ pageNum, paragraphs });
         }
       }catch(err){
