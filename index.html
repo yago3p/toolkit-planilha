@@ -517,7 +517,18 @@ footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(-
         </div>
       </div>
 
-      <div id="reorgPageGrid" class="page-grid"></div>
+      <div class="card mt-16" style="padding:10px 14px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-secondary);cursor:pointer;">
+          <input type="checkbox" id="reorgSelectAllCheck">
+          <span id="reorgSelectionLabel">Nenhuma página selecionada</span>
+        </label>
+        <div id="reorgBulkActions" class="hidden" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-secondary btn-sm" id="reorgBulkRotateBtn"><span id="reorgBulkRotateIcon"></span><span>Girar selecionadas</span></button>
+          <button class="btn btn-secondary btn-sm" id="reorgBulkDeleteBtn" style="color:var(--danger);border-color:rgba(248,113,113,.3);"><span id="reorgBulkDeleteIcon"></span><span>Excluir selecionadas</span></button>
+        </div>
+      </div>
+
+      <div id="reorgPageGrid" class="page-grid mt-16"></div>
 
       <button class="btn btn-primary btn-block mt-22" id="reorgExportBtn">
         <span id="reorgExportIcon"></span>
@@ -672,6 +683,8 @@ document.getElementById('reorgFileThumb').innerHTML = icon('file-text','width="1
 document.getElementById('reorgChangeIcon').innerHTML = icon('rotate-ccw','width="14" height="14"');
 document.getElementById('reorgHint').innerHTML = icon('info','width="13" height="13"') + ' Arraste as páginas para reordenar, ou use as setas. O ícone de lixeira remove a página.';
 document.getElementById('reorgExportIcon').innerHTML = icon('download','width="16" height="16"');
+document.getElementById('reorgBulkRotateIcon').innerHTML = icon('rotate-cw','width="14" height="14"');
+document.getElementById('reorgBulkDeleteIcon').innerHTML = icon('trash-2','width="14" height="14"');
 document.getElementById('tabConvertBtn').innerHTML = icon('arrow-right-left','width="16" height="16"') + ' Converter PDF';
 document.getElementById('cvDzIcon').innerHTML = icon('cloud-upload','width="26" height="26"');
 document.getElementById('cvTag1').innerHTML = icon('check','width="13" height="13"') + ' Sem upload para servidores';
@@ -1179,7 +1192,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
       fileMetaEl.textContent = `${originalPageCount} página(s) · ${(file.size/1024/1024).toFixed(2)} MB`;
       outputName.value = file.name.replace(/\.[^/.]+$/, '') + '_reorganizado';
 
-      pages = Array.from({length: originalPageCount}, (_,i)=> ({ originalIndex: i, thumbUrl: null, rotation: 0 }));
+      pages = Array.from({length: originalPageCount}, (_,i)=> ({ originalIndex: i, thumbUrl: null, rotation: 0, selected: false }));
 
       dropZone.classList.add('hidden');
       workArea.classList.remove('hidden');
@@ -1229,7 +1242,10 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
       card.dataset.originalIndex = p.originalIndex;
       card.innerHTML = `
         <div class="thumb-wrap loading">${p.thumbUrl ? `<img src="${p.thumbUrl}" alt="Página ${p.originalIndex+1}" style="transform:rotate(${p.rotation}deg);">` : icon('loader-circle','width="18" height="18" class="spin-ic"')}</div>
-        <span class="pnum">Pág. ${p.originalIndex+1}</span>
+        <label class="pnum" style="cursor:pointer;display:flex;align-items:center;gap:5px;">
+          <input type="checkbox" data-act="select" ${p.selected?'checked':''} style="margin:0;width:11px;height:11px;accent-color:var(--accent);">
+          Pág. ${p.originalIndex+1}
+        </label>
         <button class="pdel" data-act="del" title="Remover página">${icon('x','width="12" height="12"')}</button>
         <div class="porder">
           <span>${idx+1}ª posição</span>
@@ -1242,6 +1258,8 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
       `;
       card.querySelector('[data-act="del"]').addEventListener('click', ()=> deletePage(idx));
       card.querySelector('[data-act="rotate"]').addEventListener('click', ()=> rotatePage(idx));
+      card.querySelector('[data-act="select"]').addEventListener('click', e=> e.stopPropagation());
+      card.querySelector('[data-act="select"]').addEventListener('change', e=>{ pages[idx].selected = e.target.checked; updateSelectionUI(); });
       card.querySelector('[data-act="up"]').addEventListener('click', ()=> movePage(idx,-1));
       card.querySelector('[data-act="down"]').addEventListener('click', ()=> movePage(idx,1));
 
@@ -1262,6 +1280,19 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
       pageGrid.appendChild(card);
     });
     lucide.createIcons();
+    updateSelectionUI();
+  }
+
+  function updateSelectionUI(){
+    const label = document.getElementById('reorgSelectionLabel');
+    const bulkActions = document.getElementById('reorgBulkActions');
+    const selectAllCheck = document.getElementById('reorgSelectAllCheck');
+    const count = pages.filter(p=> p.selected).length;
+
+    label.textContent = count===0 ? 'Nenhuma página selecionada' : `${count} página(s) selecionada(s)`;
+    bulkActions.classList.toggle('hidden', count===0);
+    selectAllCheck.checked = pages.length>0 && count===pages.length;
+    selectAllCheck.indeterminate = count>0 && count<pages.length;
   }
 
   function clearDragOverStyles(){
@@ -1279,6 +1310,29 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     pages[idx].rotation = (pages[idx].rotation + 90) % 360;
     renderGrid();
   }
+
+  document.getElementById('reorgSelectAllCheck').addEventListener('change', e=>{
+    pages.forEach(p=> p.selected = e.target.checked);
+    renderGrid();
+  });
+
+  document.getElementById('reorgBulkRotateBtn').addEventListener('click', ()=>{
+    const selected = pages.filter(p=> p.selected);
+    if (!selected.length) return;
+    selected.forEach(p=> p.rotation = (p.rotation + 90) % 360);
+    renderGrid();
+    showToast(`${selected.length} página(s) girada(s).`, 'success');
+  });
+
+  document.getElementById('reorgBulkDeleteBtn').addEventListener('click', ()=>{
+    const selectedCount = pages.filter(p=> p.selected).length;
+    if (!selectedCount) return;
+    if (selectedCount >= pages.length){ showToast('O PDF precisa ter ao menos uma página.', 'warning'); return; }
+    if (!confirm(`Excluir ${selectedCount} página(s) selecionada(s)?`)) return;
+    pages = pages.filter(p=> !p.selected);
+    renderGrid();
+    showToast(`${selectedCount} página(s) excluída(s).`, 'success');
+  });
 
   function deletePage(idx){
     if (pages.length <= 1){ showToast('O PDF precisa ter ao menos uma página.', 'warning'); return; }
