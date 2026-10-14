@@ -434,7 +434,7 @@ footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(-
     </div>
     <p class="modal-desc">
       Defina os campos que deseja extrair de cada planilha. Cada campo pode vir de uma <strong>célula fixa</strong> (um valor por aba, ex: B2), de uma <strong>coluna da tabela</strong> (um valor por linha, ex: coluna F) ou ser um <strong>valor fixo</strong> digitado por você.
-      As colunas <strong>Arquivo</strong> e <strong>Aba</strong> são incluídas automaticamente. Use as setas de cada campo para definir a ordem das colunas.
+      As colunas <strong>Arquivo</strong>, <strong>Aba</strong> e <strong>Linha</strong> são incluídas automaticamente. Use as setas de cada campo para definir a ordem das colunas.
     </p>
     <div class="start-row-box">
       <label class="field-label">Linha inicial da tabela de dados</label>
@@ -492,6 +492,11 @@ footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(-
         <p style="font-size:12.5px;color:var(--text-secondary);line-height:1.6;margin-top:8px;">
           Cada arquivo adicionado mostra suas abas como botões: <strong style="color:var(--text)">clique para marcar ou desmarcar</strong>
           quais abas entram na compilação (por padrão, todas vêm marcadas). Use "Todas" e "Nenhuma" para agilizar a seleção em cada arquivo.
+        </p>
+        <p style="font-size:12.5px;color:var(--text-secondary);line-height:1.6;margin-top:8px;">
+          Cada registro vem com três colunas automáticas: <strong style="color:var(--text)">Arquivo</strong>, <strong style="color:var(--text)">Aba</strong>
+          e <strong style="color:var(--text)">Linha</strong> — o número da linha da planilha original de onde o dado foi extraído (o mesmo número que aparece no Excel).
+          Quando a configuração só tem campos de célula fixa ou valor fixo, sai um registro por aba e a Linha fica vazia.
         </p>
         <p style="font-size:12.5px;color:var(--text-secondary);line-height:1.6;margin-top:8px;">
           Depois de processar, dá pra buscar, ordenar clicando no cabeçalho da coluna, e exportar o resultado em CSV ou XLSX.
@@ -770,7 +775,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
     { value:'image', label:'Imagem (em breve)', icon:'image' }
   ];
   const DATA_TYPE_LABELS = { text:'texto', number:'número', currency:'moeda', date:'data', latitude:'latitude', longitude:'longitude', image:'imagem' };
-  const NUMERIC_TYPES = ['number','currency','latitude','longitude'];
+  const NUMERIC_TYPES = ['number','currency','latitude','longitude','row'];
 
   const dropZone = document.getElementById('cpDropZone');
   const fileInput = document.getElementById('cpFileInput');
@@ -1119,14 +1124,15 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
       const origem = f.sourceType==='cell' ? `célula ${f.address}` : f.sourceType==='fixed' ? `valor fixo "${f.address}"` : `coluna ${f.address}`;
       return `<strong style="color:var(--text)">${f.name}</strong> (${origem}, ${DATA_TYPE_LABELS[f.dataType]||f.dataType})`;
     });
-    fieldsSummaryText.innerHTML = parts.join(' <span style="color:var(--border)">•</span> ') + ' <span style="color:var(--text-secondary)">— Arquivo e Aba são incluídos automaticamente.</span>';
+    fieldsSummaryText.innerHTML = parts.join(' <span style="color:var(--border)">•</span> ') + ' <span style="color:var(--text-secondary)">— Arquivo, Aba e Linha são incluídos automaticamente.</span>';
   }
 
   /* Colunas dinâmicas */
   function getColumns(){
     const base = [
       { key:'arquivo', label:'Arquivo', dataType:'text', align:'left' },
-      { key:'aba', label:'Aba', dataType:'text', align:'left' }
+      { key:'aba', label:'Aba', dataType:'text', align:'left' },
+      { key:'linha', label:'Linha', dataType:'row', align:'right' }
     ];
     const extra = config.fields.map(f=> ({ key:f.id, label:f.name, dataType:f.dataType, align: NUMERIC_TYPES.includes(f.dataType)?'right':'left' }));
     return [...base, ...extra];
@@ -1182,7 +1188,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
           fields.forEach(f=>{ if (f.sourceType==='cell' || f.sourceType==='fixed') fixedValues[f.id] = parseFieldValue(getFieldRawValue(sheet,null,f), f.dataType); });
 
           if (!columnFields.length){
-            const rowObj = { arquivo:file.name, aba:sheetName };
+            const rowObj = { arquivo:file.name, aba:sheetName, linha:null };
             fields.forEach(f=> rowObj[f.id] = fixedValues[f.id] ?? null);
             compiledData.push(rowObj);
             continue;
@@ -1194,7 +1200,7 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
             if (!row || !row.length) continue;
             const raws = columnFields.map(f=> getFieldRawValue(sheet,row,f));
             if (!raws.some(v=> v!==undefined && v!==null && String(v).trim()!=='')) continue;
-            const rowObj = { arquivo:file.name, aba:sheetName };
+            const rowObj = { arquivo:file.name, aba:sheetName, linha:r+1 };
             fields.forEach(f=>{
               rowObj[f.id] = (f.sourceType==='cell'||f.sourceType==='fixed') ? (fixedValues[f.id] ?? null) : parseFieldValue(getFieldRawValue(sheet,row,f), f.dataType);
             });
