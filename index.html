@@ -90,7 +90,15 @@ input::placeholder{color:#4a5a6b;}
 .btn-sm{padding:7px 12px;font-size:12px;}
 .btn-block{width:100%;}
 
-.gallery-list{max-height:220px;overflow-y:auto;}
+.gallery-list{max-height:320px;overflow-y:auto;}
+.cp-sheet-box{margin:-2px 0 12px;padding:0 4px;}
+.cp-sheet-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px;}
+.cp-sheet-head .cp-sheet-count{font-size:11px;font-weight:700;color:var(--accent);}
+.cp-sheet-head button{background:none;border:none;color:var(--accent);cursor:pointer;font-weight:600;font-size:11px;padding:0;font-family:'Inter',sans-serif;}
+.cp-sheet-head button:hover{text-decoration:underline;}
+.cp-sheet-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.cp-sheet-chips .un-sheet-chip{padding:5px 11px;font-size:11.5px;}
+.cp-loading{font-size:11px;color:var(--text-secondary);padding:0 4px 10px;}
 
 .top-banner{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
 .top-banner .lbl{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--accent);margin-bottom:4px;}
@@ -482,6 +490,10 @@ footer.app-footer{margin-top:40px;text-align:center;font-size:11.5px;color:var(-
           <li><strong style="color:var(--text)">Valor fixo</strong> — um texto que você digita, igual em todas as linhas</li>
         </ul>
         <p style="font-size:12.5px;color:var(--text-secondary);line-height:1.6;margin-top:8px;">
+          Cada arquivo adicionado mostra suas abas como botões: <strong style="color:var(--text)">clique para marcar ou desmarcar</strong>
+          quais abas entram na compilação (por padrão, todas vêm marcadas). Use "Todas" e "Nenhuma" para agilizar a seleção em cada arquivo.
+        </p>
+        <p style="font-size:12.5px;color:var(--text-secondary);line-height:1.6;margin-top:8px;">
           Depois de processar, dá pra buscar, ordenar clicando no cabeçalho da coluna, e exportar o resultado em CSV ou XLSX.
         </p>
       </div>
@@ -785,31 +797,92 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   ['dragleave','drop'].forEach(ev=> dropZone.addEventListener(ev, e=>{ e.preventDefault(); dropZone.classList.remove('drag-active'); }));
   dropZone.addEventListener('drop', e=> addFiles(Array.from(e.dataTransfer.files)));
 
-  function addFiles(files){
+  /* Abas de cada arquivo: key -> { sheetNames:[], selected:Set } */
+  const sheetInfo = new Map();
+  const fileKey = f => `${f.name}|${f.size}|${f.lastModified}`;
+
+  async function loadSheetNames(f){
+    try{
+      const buf = await f.arrayBuffer();
+      const wb = XLSX.read(buf, { type:'array', bookSheets:true });
+      sheetInfo.set(fileKey(f), { sheetNames: wb.SheetNames.slice(), selected: new Set(wb.SheetNames) });
+    }catch(err){
+      console.error('Erro ao ler abas de '+f.name, err);
+      sheetInfo.set(fileKey(f), { sheetNames: [], selected: new Set(), error:true });
+    }
+  }
+
+  async function addFiles(files){
     const valid = files.filter(f=> /\.(xlsx|xls)$/i.test(f.name));
     if (!valid.length){ showToast('Selecione arquivos com extensão .xlsx ou .xls.', 'warning'); return; }
-    valid.forEach(f=>{ if (!selectedFiles.some(s=> s.name===f.name && s.size===f.size)) selectedFiles.push(f); });
+    const added = [];
+    valid.forEach(f=>{ if (!selectedFiles.some(s=> s.name===f.name && s.size===f.size)){ selectedFiles.push(f); added.push(f); } });
+    renderFileList();
+    await Promise.all(added.map(loadSheetNames));
     renderFileList();
   }
-  function removeFile(idx){ selectedFiles.splice(idx,1); renderFileList(); }
+  function removeFile(idx){ sheetInfo.delete(fileKey(selectedFiles[idx])); selectedFiles.splice(idx,1); renderFileList(); }
   clearBtn.addEventListener('click', ()=>{
-    selectedFiles = []; compiledData = []; filteredData = [];
+    selectedFiles = []; compiledData = []; filteredData = []; sheetInfo.clear();
     renderFileList(); resultsWrap.classList.add('hidden');
   });
+
+  function toggleSheet(key, sheet){
+    const info = sheetInfo.get(key); if (!info) return;
+    if (info.selected.has(sheet)) info.selected.delete(sheet); else info.selected.add(sheet);
+    renderFileList();
+  }
+  function setAllSheets(key, all){
+    const info = sheetInfo.get(key); if (!info) return;
+    info.selected = all ? new Set(info.sheetNames) : new Set();
+    renderFileList();
+  }
+  const escAttr = s => String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
 
   function renderFileList(){
     listWrap.classList.toggle('hidden', selectedFiles.length===0);
     fileCountLabel.textContent = `Arquivos selecionados (${selectedFiles.length})`;
-    fileListEl.innerHTML = selectedFiles.map((f,idx)=>`
-      <div class="file-card">
-        <div class="file-thumb">${icon('file-spreadsheet','width="15" height="15"')}</div>
-        <div class="file-meta"><div class="name">${f.name}</div><div class="sub">${(f.size/1024).toFixed(1)} KB</div></div>
-        <button class="icon-btn danger" data-idx="${idx}">${icon('x','width="14" height="14"')}</button>
-      </div>
-    `).join('');
+    fileListEl.innerHTML = selectedFiles.map((f,idx)=>{
+      const key = fileKey(f);
+      const info = sheetInfo.get(key);
+      let sheetsHtml;
+      if (!info){
+        sheetsHtml = `<div class="cp-loading">Lendo abas...</div>`;
+      } else if (info.error){
+        sheetsHtml = `<div class="cp-loading" style="color:var(--danger);">Não foi possível ler as abas deste arquivo.</div>`;
+      } else {
+        const chips = info.sheetNames.map(s=>`
+          <button type="button" class="un-sheet-chip ${info.selected.has(s)?'active':''}" data-cp-key="${escAttr(key)}" data-cp-sheet="${escAttr(s)}">
+            ${icon('check','width="12" height="12"')}<span>${escAttr(s)}</span>
+          </button>`).join('');
+        sheetsHtml = `
+          <div class="cp-sheet-box">
+            <div class="cp-sheet-head">
+              <span class="cp-sheet-count">${info.selected.size}/${info.sheetNames.length} aba(s) selecionada(s)</span>
+              <button type="button" data-cp-all="${escAttr(key)}">Todas</button>
+              <button type="button" data-cp-none="${escAttr(key)}">Nenhuma</button>
+            </div>
+            <div class="cp-sheet-chips">${chips}</div>
+          </div>`;
+      }
+      return `
+      <div class="un-file-card" style="padding:0;">
+        <div class="file-card" style="margin:0;border:none;background:transparent;">
+          <div class="file-thumb">${icon('file-spreadsheet','width="15" height="15"')}</div>
+          <div class="file-meta"><div class="name">${f.name}</div><div class="sub">${(f.size/1024).toFixed(1)} KB</div></div>
+          <button class="icon-btn danger" data-idx="${idx}">${icon('x','width="14" height="14"')}</button>
+        </div>
+        <div style="padding:0 13px;">${sheetsHtml}</div>
+      </div>`;
+    }).join('');
     fileListEl.querySelectorAll('button[data-idx]').forEach(btn=>{
       btn.addEventListener('click', ()=> removeFile(parseInt(btn.dataset.idx,10)));
     });
+    fileListEl.querySelectorAll('[data-cp-sheet]').forEach(chip=>{
+      chip.addEventListener('click', ()=> toggleSheet(chip.dataset.cpKey, chip.dataset.cpSheet));
+    });
+    fileListEl.querySelectorAll('[data-cp-all]').forEach(b=> b.addEventListener('click', ()=> setAllSheets(b.dataset.cpAll, true)));
+    fileListEl.querySelectorAll('[data-cp-none]').forEach(b=> b.addEventListener('click', ()=> setAllSheets(b.dataset.cpNone, false)));
     lucide.createIcons();
   }
 
@@ -1078,6 +1151,9 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   processBtn.addEventListener('click', async ()=>{
     if (!selectedFiles.length) return;
     if (!config.fields.length){ showToast('Configure ao menos um campo antes de processar.', 'warning'); return; }
+    if (selectedFiles.some(f=> !sheetInfo.has(fileKey(f)))){ showToast('Aguarde: ainda lendo as abas dos arquivos.', 'info'); return; }
+    const totalSelectedSheets = selectedFiles.reduce((n,f)=> n + (sheetInfo.get(fileKey(f))?.selected.size || 0), 0);
+    if (!totalSelectedSheets){ showToast('Selecione ao menos uma aba para compilar.', 'warning'); return; }
 
     progressWrap.classList.remove('hidden');
     compiledData = [];
@@ -1097,7 +1173,9 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
         const buf = await file.arrayBuffer();
         const workbook = XLSX.read(buf, { type:'array', cellDates:true, cellFormulas:false });
 
+        const chosen = sheetInfo.get(fileKey(file))?.selected;
         for (const sheetName of workbook.SheetNames){
+          if (chosen && !chosen.has(sheetName)) continue;
           totalSheets++;
           const sheet = workbook.Sheets[sheetName];
           const fixedValues = {};
